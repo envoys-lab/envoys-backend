@@ -37,3 +37,7 @@ lerna-debug.log*
 # Environment
 .env
 !.env.example
+
+# Docker
+docker-compose.yml
+!docker-compose.yml.example

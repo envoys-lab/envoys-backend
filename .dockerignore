@@ -1,0 +1,15 @@
+Dockerfile
+.dockerignore
+docker-compose.yml.example
+docker-compose.yml
+
+node_modules
+dist
+
+.env
+.env.example
+.gitignore
+.git
+.idea
+.vscode
+README.md
