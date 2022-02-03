@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { ConfigModule } from '@nestjs/config'
-import { MongooseModule } from '@nestjs/mongoose'
+import { TypeOrmModule } from '@nestjs/typeorm'
 import { UsersModule } from './users/users.module'
 import configuration from './config'
+import { dbConfigService } from './config/ormconfig'
 
 @Module({
   imports: [
@@ -12,10 +13,13 @@ import configuration from './config'
       isGlobal: true,
       load: [configuration],
     }),
-    MongooseModule.forRoot(process.env.DB_HOST),
+    TypeOrmModule.forRootAsync({
+      useClass: dbConfigService,
+      inject: [dbConfigService],
+    }),
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, dbConfigService],
 })
 export class AppModule {}
