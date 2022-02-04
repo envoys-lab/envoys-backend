@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { UsersModule } from './users/users.module'
 import configuration from './config'
 import { dbConfigService } from './config/ormconfig'
+import { KYCModule } from './kyc/kyc.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { dbConfigService } from './config/ormconfig'
       inject: [dbConfigService],
     }),
     UsersModule,
+    KYCModule,
   ],
   controllers: [AppController],
   providers: [AppService, dbConfigService],

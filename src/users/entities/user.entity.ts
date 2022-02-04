@@ -7,4 +7,25 @@ export default class User extends BaseEntity {
 
   @Column()
   userWalletAddress: string
+
+  @Column()
+  KYC_request_id: string
+
+  @Column()
+  KYC_type: string
+
+  @Column()
+  KYC_verification_id: string
+
+  @Column()
+  KYC_status: 'unused' | 'pending' | 'completed'
+
+  @Column()
+  KYC_verified: boolean
+
+  @Column()
+  KYC_verifications: object
+
+  @Column()
+  KYC_aplicant: object
 }

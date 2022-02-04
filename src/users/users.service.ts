@@ -19,14 +19,44 @@ export class UsersService {
     return fetchedUser
   }
 
-  async createUser(userWalletAddresss: string): Promise<User> {
+  async createUser(userWalletAddress: string): Promise<User> {
     try {
-      await this.getUserByWalletAddress(userWalletAddresss, true)
+      await this.getUserByWalletAddress(userWalletAddress, true)
     } catch (error) {
       throw new BadRequestException(error.message)
     }
 
-    const newUser = await this.usersRepository.create({ userWalletAddress: userWalletAddresss })
+    const newUser: Partial<User> = await this.usersRepository.create({
+      userWalletAddress: userWalletAddress,
+    })
     return this.usersRepository.save(newUser)
+  }
+
+  async updateUser(dto: Partial<User>) {
+    const fetchedUser = await this.getUserByWalletAddress(dto.userWalletAddress)
+
+    if (dto.KYC_request_id != null) {
+      fetchedUser.KYC_request_id = dto.KYC_request_id
+    }
+    if (dto.KYC_type != null) {
+      fetchedUser.KYC_type = dto.KYC_type
+    }
+    if (dto.KYC_verification_id != null) {
+      fetchedUser.KYC_verification_id = dto.KYC_verification_id
+    }
+    if (dto.KYC_status != null) {
+      fetchedUser.KYC_status = dto.KYC_status
+    }
+    if (dto.KYC_verified != null) {
+      fetchedUser.KYC_verified = dto.KYC_verified
+    }
+    if (dto.KYC_verifications != null) {
+      fetchedUser.KYC_verifications = dto.KYC_verifications
+    }
+    if (dto.KYC_aplicant != null) {
+      fetchedUser.KYC_aplicant = dto.KYC_aplicant
+    }
+
+    return this.usersRepository.save(fetchedUser)
   }
 }

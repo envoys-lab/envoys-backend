@@ -12,7 +12,7 @@ export class UsersController {
     return this.usersService.getUserByWalletAddress(userWalletAddress)
   }
 
-  @Post()
+  @Post('/new')
   async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.usersService.createUser(createUserDto.userWalletAddress)
   }
