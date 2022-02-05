@@ -1,5 +1,19 @@
 version: 2
 
+workflows:
+  version: 2
+  master:
+    jobs:
+      - build
+      - deploy:
+          context: develop
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - features/EN-4-Deploy-ci
+
 jobs:
   build:
     docker:
@@ -16,13 +30,11 @@ jobs:
   deploy:
     docker:
       - image: cimg/base:stable
-    context: develop
-    filters:
-      branches:
-        only:
-          - features/EN-4-Deploy-ci
     steps:
       - checkout
+      - run:
+          name: Testing
+          command: echo $PORTAINER_LOGIN
       - run:
           name: Build image
           command: docker build -t envoys-backend .
