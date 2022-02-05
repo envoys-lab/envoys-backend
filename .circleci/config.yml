@@ -5,10 +5,18 @@ workflows:
   master:
     jobs:
       - build
-      - deploy:
+      - image:
           context: develop
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - features/EN-4-Deploy-ci
+      - deploy:
+          context: develop
+          requires:
+            - image
           filters:
             branches:
               only:
@@ -27,7 +35,7 @@ jobs:
           name: Check the project (buid/lint/test)
           command: npm run check
 
-  deploy:
+  image:
     machine: true
     steps:
       - checkout
@@ -43,6 +51,15 @@ jobs:
             echo "Build number: ${CIRCLE_BUILD_NUM}"
             docker tag envoys-backend "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
             docker push "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
+
+  deploy:
+    docker:
+      - image: bash:5-alpine3.15
+    steps:
+      - checkout
+      - run:
+          name: Install cURL
+          command: apk add curl
       - run:
           name: Run deploy
           command: ./.circleci/deploy.sh "${STACK_BACKEND}" "${CIRCLE_BUILD_NUM}"

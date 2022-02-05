@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 STACK_ID="$1"
 VERSION="$2"
@@ -17,10 +17,9 @@ fi
 
 echo "Login: $PORTAINER_LOGIN"
 echo "Password: $PORTAINER_PASSWORD"
-payload=$(echo "{\"username\": \"$PORTAINER_LOGIN\",\"password\": \"$PORTAINER_PASSWORD\"}")
+payload=$(echo "{\"username\":\"$PORTAINER_LOGIN\",\"password\":\"$PORTAINER_PASSWORD\"}")
 json=$(curl --silent --location --request POST 'https://portainer.beta.envoys.vision/api/auth' -H 'Content-Type: application/json' -d "$payload")
 
-echo "Result: ${json}"
 if [[ ${json} != *"jwt"* ]];then
       echo "Authorization failed. Exit."
       exit 1
