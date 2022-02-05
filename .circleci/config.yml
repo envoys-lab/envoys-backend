@@ -32,8 +32,16 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Testing
-          command: echo $PORTAINER_LOGIN
+          name: Docker login
+          command: docker login -u ${REGISTRY_LOGIN} -p ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
       - run:
-          name: Build image
+          name: Build docker image
           command: docker build -t envoys-backend .
+      - run:
+          name: Publish image
+          command: |
+            docker tag envoys-backend "registry.beta.envoys.vision/envoys-backend:develop-<< pipeline.number >>"
+            docker push "registry.beta.envoys.vision/envoys-backend:develop-<< pipeline.number >>"
+      - run:
+          name: Run deploy
+          command: ./deploy.sh ${STACK_BACKEND} << pipeline.number >>
