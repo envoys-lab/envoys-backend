@@ -1,5 +1,27 @@
 version: 2
 
+workflows:
+  version: 2
+  master:
+    jobs:
+      - build
+      - image:
+          context: develop
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+      - deploy:
+          context: develop
+          requires:
+            - image
+          filters:
+            branches:
+              only:
+                - develop
+
 jobs:
   build:
     docker:
@@ -12,3 +34,32 @@ jobs:
       - run:
           name: Check the project (buid/lint/test)
           command: npm run check
+
+  image:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Docker login
+          command: docker login -u ${REGISTRY_LOGIN} -p ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
+      - run:
+          name: Build docker image
+          command: docker build -t envoys-backend .
+      - run:
+          name: Publish docker image
+          command: |
+            echo "Build number: ${CIRCLE_BUILD_NUM}"
+            docker tag envoys-backend "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
+            docker push "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
+
+  deploy:
+    docker:
+      - image: bash:5-alpine3.15
+    steps:
+      - checkout
+      - run:
+          name: Install cURL
+          command: apk add curl
+      - run:
+          name: Run deploy
+          command: ./.circleci/deploy.sh "${STACK_BACKEND}" "${CIRCLE_PREVIOUS_BUILD_NUM}"
