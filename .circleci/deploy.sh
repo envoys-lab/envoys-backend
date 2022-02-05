@@ -16,7 +16,7 @@ then
 fi
 
 payload=$(echo "{\"username\":\"$PORTAINER_LOGIN\",\"password\":\"$PORTAINER_PASSWORD\"}")
-json=$(curl --silent --location --request POST 'https://portainer.beta.envoys.vision/api/auth' -H 'Content-Type: application/json' -d "$payload")
+json=$(curl --silent --location --request POST "$PORTAINER_HOST/api/auth" -H 'Content-Type: application/json' -d "$payload")
 
 if [[ ${json} != *"jwt"* ]];then
       echo "Authorization failed. Exit."
@@ -25,8 +25,8 @@ fi
 
 echo "Authorization success. Start deploying version '$VERSION' to stack: $STACK_ID"
 TOKEN=$(echo $json | sed "s/{.*\"jwt\":\"\([^\"]*\).*}/\1/g")
-deploy=$(echo "{\"env\":[{\"name\":\"VERSION\",\"value\":\"$VERSION\"}],\"prune\":true,\"RepositoryReferenceName\":\"refs/heads/develop\",\"RepositoryAuthentication\":true,\"RepositoryUsername\":\"$REPOSITORY_LOGIN\",\"RepositoryPassword\":\"$REPOSITORY_PASSWORD\"}")
-result=$(curl --silent --location --request PUT "https://portainer.beta.envoys.vision/api/stacks/$STACK_ID/git/redeploy?endpointId=1" -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -d "$deploy")
+deploy=$(echo "{\"env\":[{\"name\":\"VERSION\",\"value\":\"$VERSION\"}],\"prune\":true,\"RepositoryReferenceName\":\"refs/heads/$PORTAINER_BRANCH\",\"RepositoryAuthentication\":true,\"RepositoryUsername\":\"$REPOSITORY_LOGIN\",\"RepositoryPassword\":\"$REPOSITORY_PASSWORD\"}")
+result=$(curl --silent --location --request PUT "$PORTAINER_HOST/api/stacks/$STACK_ID/git/redeploy?endpointId=1" -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -d "$deploy")
 
 if [[ ${result} != *"UpdatedBy"* ]];then
       echo "Deployment failed: $result"
