@@ -12,7 +12,7 @@ workflows:
           filters:
             branches:
               only:
-                - features/EN-4-Deploy-ci
+                - develop
       - deploy:
           context: develop
           requires:
@@ -20,7 +20,7 @@ workflows:
           filters:
             branches:
               only:
-                - features/EN-4-Deploy-ci
+                - develop
 
 jobs:
   build:
