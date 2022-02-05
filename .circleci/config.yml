@@ -12,3 +12,17 @@ jobs:
       - run:
           name: Check the project (buid/lint/test)
           command: npm run check
+
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    context: develop
+    filters:
+      branches:
+        only:
+          - features/EN-4-Deploy-ci
+    steps:
+      - checkout
+      - run:
+          name: Build image
+          command: docker build -t envoys-backend .
