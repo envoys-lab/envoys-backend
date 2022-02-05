@@ -62,4 +62,4 @@ jobs:
           command: apk add curl
       - run:
           name: Run deploy
-          command: ./.circleci/deploy.sh "${STACK_BACKEND}" "${CIRCLE_BUILD_NUM}"
+          command: ./.circleci/deploy.sh "${STACK_BACKEND}" "${CIRCLE_PREVIOUS_BUILD_NUM}"
