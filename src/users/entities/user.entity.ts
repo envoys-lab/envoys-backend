@@ -1,4 +1,5 @@
 import { BaseEntity, Column, Entity, ObjectIdColumn } from 'typeorm'
+import { VerificationStatus } from '../enum/user.status.enum'
 
 @Entity({ name: 'Users' })
 export default class User extends BaseEntity {
@@ -9,23 +10,20 @@ export default class User extends BaseEntity {
   userWalletAddress: string
 
   @Column()
-  KYC_request_id: string
+  request_id: string
 
   @Column()
-  KYC_type: string
+  type: string
 
   @Column()
-  KYC_verification_id: string
+  verification_id: string
 
   @Column()
-  KYC_status: 'unused' | 'pending' | 'completed'
+  status: VerificationStatus
 
   @Column()
-  KYC_verified: boolean
+  verified: boolean
 
   @Column()
-  KYC_verifications: object
-
-  @Column()
-  KYC_aplicant: object
+  verifications: object
 }

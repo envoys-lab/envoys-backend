@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import User from './entities/user.entity'
+import { VerificationStatus } from './enum/user.status.enum'
 
 @Injectable()
 export class UsersService {
@@ -35,26 +36,23 @@ export class UsersService {
   async updateUser(dto: Partial<User>) {
     const fetchedUser = await this.getUserByWalletAddress(dto.userWalletAddress)
 
-    if (dto.KYC_request_id != null) {
-      fetchedUser.KYC_request_id = dto.KYC_request_id
+    if (dto.request_id != null) {
+      fetchedUser.request_id = dto.request_id
     }
-    if (dto.KYC_type != null) {
-      fetchedUser.KYC_type = dto.KYC_type
+    if (dto.type != null) {
+      fetchedUser.type = dto.type
     }
-    if (dto.KYC_verification_id != null) {
-      fetchedUser.KYC_verification_id = dto.KYC_verification_id
+    if (dto.verification_id != null) {
+      fetchedUser.verification_id = dto.verification_id
     }
-    if (dto.KYC_status != null) {
-      fetchedUser.KYC_status = dto.KYC_status
+    if (dto.status in VerificationStatus) {
+      fetchedUser.status = dto.status
     }
-    if (dto.KYC_verified != null) {
-      fetchedUser.KYC_verified = dto.KYC_verified
+    if (dto.verified != null) {
+      fetchedUser.verified = dto.verified
     }
-    if (dto.KYC_verifications != null) {
-      fetchedUser.KYC_verifications = dto.KYC_verifications
-    }
-    if (dto.KYC_aplicant != null) {
-      fetchedUser.KYC_aplicant = dto.KYC_aplicant
+    if (dto.verifications != null) {
+      fetchedUser.verifications = dto.verifications
     }
 
     return this.usersRepository.save(fetchedUser)

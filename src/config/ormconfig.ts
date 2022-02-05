@@ -9,7 +9,7 @@ export class dbConfigService implements TypeOrmOptionsFactory {
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
       type: 'mongodb',
-      url: this.configService.get<string>('server.dbConnectionString'),
+      url: this.configService.get<string>('database.dbConnectionString'),
       logging: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,

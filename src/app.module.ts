@@ -4,7 +4,7 @@ import { AppService } from './app.service'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { UsersModule } from './users/users.module'
-import configuration from './config'
+import * as configuration from './config'
 import { dbConfigService } from './config/ormconfig'
 import { KYCModule } from './kyc/kyc.module'
 
@@ -12,7 +12,7 @@ import { KYCModule } from './kyc/kyc.module'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration],
+      load: [configuration.server, configuration.database, configuration.kyc],
     }),
     TypeOrmModule.forRootAsync({
       useClass: dbConfigService,

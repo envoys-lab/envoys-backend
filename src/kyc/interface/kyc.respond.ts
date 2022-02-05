@@ -1,3 +1,5 @@
+import { VerificationStatus } from 'src/users/enum/user.status.enum'
+
 export interface GetFormUrlResponse {
   form_id: string
   form_url: string
@@ -7,7 +9,7 @@ export interface GetFormUrlResponse {
 export interface GetVerificationResponse {
   applicant_id: string
   verification_id: string
-  status: 'unused' | 'pending' | 'completed'
+  status: VerificationStatus
   verified: boolean
   verifications: object
 }
