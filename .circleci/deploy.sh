@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 STACK_ID="$1"
 VERSION="$2"
