@@ -38,10 +38,11 @@ jobs:
           name: Build docker image
           command: docker build -t envoys-backend .
       - run:
-          name: Publish image
+          name: Publish docker image
           command: |
-            docker tag envoys-backend "registry.beta.envoys.vision/envoys-backend:develop-<< pipeline.number >>"
-            docker push "registry.beta.envoys.vision/envoys-backend:develop-<< pipeline.number >>"
+            
+            docker tag envoys-backend "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
+            docker push "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
       - run:
           name: Run deploy
-          command: ./deploy.sh ${STACK_BACKEND} << pipeline.number >>
+          command: ./deploy.sh "${STACK_BACKEND}" "${CIRCLE_BUILD_NUM}"
