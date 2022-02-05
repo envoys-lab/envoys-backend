@@ -28,8 +28,7 @@ jobs:
           command: npm run check
 
   deploy:
-    docker:
-      - image: docker:20
+    machine: true
     steps:
       - checkout
       - run:
