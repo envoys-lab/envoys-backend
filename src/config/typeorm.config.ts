@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm'
 
 @Injectable()
-export class dbConfigService implements TypeOrmOptionsFactory {
+export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
@@ -14,7 +14,7 @@ export class dbConfigService implements TypeOrmOptionsFactory {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       synchronize: true,
-      entities: ['dist/users/entities/*.entity.js'],
+      entities: ['dist/users/entities/user.entity.js'],
     }
   }
 }
