@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { Observable } from 'rxjs'
 
 @Injectable()
-export class KYCRequestInterceptor implements NestInterceptor {
+export class KYCAidPostRequestInterceptor implements NestInterceptor {
   constructor(private httpService: HttpService, private configService: ConfigService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {

@@ -1,4 +1,4 @@
-import { VerificationStatus } from 'src/users/enum/user.status.enum'
+import { VerificationStatus } from 'src/kycaid/enum/user.enum'
 
 export interface GetFormUrlResponse {
   form_id: string
@@ -7,7 +7,7 @@ export interface GetFormUrlResponse {
 }
 
 export interface GetVerificationResponse {
-  applicant_id: string
+  applicant_id?: string
   verification_id: string
   status: VerificationStatus
   verified: boolean

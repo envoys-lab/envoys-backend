@@ -1,28 +1,28 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common'
-import { GetFormUrl, GetVerification, KYCCallback } from './dto/kyc.dto'
-import { KYCService } from './kyc.service'
+import { Body, Controller, Get, Param, Post, Query, UseInterceptors } from '@nestjs/common'
+import { GetFormUrl, KYCAidCallback } from 'src/kycaid/dto/kycaid.dto'
+import { KYCAidGetRequestInterceptor } from 'src/kycaid/interceptor/kycaid.get.interceptor'
+import { KYCAidPostRequestInterceptor } from 'src/kycaid/interceptor/kycaid.post.interceptor'
+import { KYCAidService } from 'src/kycaid/kycaid.service'
+import { UserType } from 'src/kycaid/enum/user.enum'
 
 @Controller('kyc')
 export class KYCController {
-  constructor(private readonly kycService: KYCService) {}
+  constructor(private readonly kycAidService: KYCAidService) {}
 
-  @Get('forms/:form_id/urls')
-  async getFormUrl(@Param('form_id') form_id: string, @Body() dto: GetFormUrl) {
-    return this.kycService.getFormUrl(form_id, dto)
+  @Get('new/:userWalletAddress')
+  @UseInterceptors(KYCAidPostRequestInterceptor)
+  async getFormUrl(@Query('type') userType: UserType, @Body() dto: GetFormUrl) {
+    return this.kycAidService.getFormUrl(userType, dto)
   }
 
-  @Get('verifications/:verification_id')
-  async getVerification(@Param('verification_id') verification_id: string, @Body() dto: GetVerification) {
-    return this.kycService.getVerification(verification_id, dto)
-  }
-
-  @Get('applicants/:applicant_id')
-  async getApplicant(@Param('applicant_id') applicantId: string) {
-    return this.kycService.getApplicant(applicantId)
+  @Get('status/:userWalletAddress')
+  @UseInterceptors(KYCAidGetRequestInterceptor)
+  async getVerification(@Param('userWalletAddress') userWalletAddress: string) {
+    return this.kycAidService.getVerification(userWalletAddress)
   }
 
   @Post('callback')
-  async processCallback(@Body() dto: KYCCallback) {
-    return this.kycService.processCallback(dto)
+  async processCallback(@Body() dto: KYCAidCallback) {
+    return this.kycAidService.processCallback(dto)
   }
 }

@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import User from './entities/user.entity'
-import { VerificationStatus } from './enum/user.status.enum'
 
 @Injectable()
 export class UsersService {
@@ -29,32 +28,8 @@ export class UsersService {
 
     const newUser: Partial<User> = await this.usersRepository.create({
       userWalletAddress: userWalletAddress,
+      verification: {},
     })
     return this.usersRepository.save(newUser)
-  }
-
-  async updateUser(dto: Partial<User>) {
-    const fetchedUser = await this.getUserByWalletAddress(dto.userWalletAddress)
-
-    if (dto.request_id != null) {
-      fetchedUser.request_id = dto.request_id
-    }
-    if (dto.type != null) {
-      fetchedUser.type = dto.type
-    }
-    if (dto.verification_id != null) {
-      fetchedUser.verification_id = dto.verification_id
-    }
-    if (dto.status in VerificationStatus) {
-      fetchedUser.status = dto.status
-    }
-    if (dto.verified != null) {
-      fetchedUser.verified = dto.verified
-    }
-    if (dto.verifications != null) {
-      fetchedUser.verifications = dto.verifications
-    }
-
-    return this.usersRepository.save(fetchedUser)
   }
 }

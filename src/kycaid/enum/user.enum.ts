@@ -3,3 +3,8 @@ export enum VerificationStatus {
   pending = 'pending',
   completed = 'completed',
 }
+
+export enum UserType {
+  PERSON = 'PERSON',
+  COMPANY = 'COMPANY',
+}
