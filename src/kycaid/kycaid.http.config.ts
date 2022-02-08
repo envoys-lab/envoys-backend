@@ -10,7 +10,7 @@ export class KYCAidHttpConfigService implements HttpModuleOptionsFactory {
       baseURL: 'https://api.kycaid.com/',
       timeout: this.configService.get<number>('http.timeout'),
       headers: {
-        Authorization: `Token ${this.configService.get<number>('kyc.token')}`,
+        Authorization: `Token ${this.configService.get<string>('kyc.token')}`,
       },
     }
   }
