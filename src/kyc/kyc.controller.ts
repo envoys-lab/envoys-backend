@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpException, Param, Post, Query } from '@nestjs/common'
 import { GetFormUrl, KYCAidCallback } from 'src/kycaid/dto/kycaid.dto'
+import { UserType } from 'src/users/entities/user.entity'
 import { KYCService } from './kyc.service'
 
 @Controller('kyc')
@@ -24,9 +25,4 @@ export class KYCController {
   async processCallback(@Body() dto: KYCAidCallback) {
     return this.kycService.callbackHandler(dto)
   }
-}
-
-enum UserType {
-  COMPANY = 'COMPANY',
-  PERSON = 'PERSON',
 }

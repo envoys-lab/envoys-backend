@@ -19,7 +19,7 @@ export default class User extends BaseEntity {
   verification: Partial<KYCAidVerification>
 }
 
-enum UserType {
+export enum UserType {
   COMPANY = 'COMPANY',
   PERSON = 'PERSON',
 }

@@ -33,42 +33,11 @@ export class KYCDatabase {
       fetchedUser = await this.getUserByVerificationId(dto.verification_id)
     }
 
-    if (dto.userType in UserType) {
-      fetchedUser.userType = dto.userType
-    }
-    if (dto.verification.applicant_id != null) {
-      fetchedUser.verification.applicant_id = dto.verification.applicant_id
-    }
-    if (dto.verification.request_id != null) {
-      fetchedUser.verification.request_id = dto.verification.request_id
-    }
-    if (dto.verification.type != null) {
-      fetchedUser.verification.type = dto.verification.type
-    }
-    if (dto.verification_id != undefined) {
-      fetchedUser.verification_id = dto.verification_id
-    }
-    if (dto.verification.status in VerificationStatus) {
-      fetchedUser.verification.status = dto.verification.status
-    }
-    if (dto.verification.verified != null) {
-      fetchedUser.verification.verified = dto.verification.verified
-    }
-    if (dto.verification.verifications != null) {
-      fetchedUser.verification.verifications = dto.verification.verifications
+    fetchedUser = {
+      ...fetchedUser,
+      ...dto,
     }
 
     return this.usersRepository.save(fetchedUser)
   }
-}
-
-enum VerificationStatus {
-  UNUSED = 'unused',
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-}
-
-enum UserType {
-  COMPANY = 'COMPANY',
-  PERSON = 'PERSON',
 }

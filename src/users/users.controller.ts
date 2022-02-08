@@ -8,12 +8,6 @@ export class UsersController {
 
   @Get(':userWalletAddress')
   async getUser(@Param('userWalletAddress') userWalletAddress: string): Promise<User> {
-    // return this.usersService.getUserByWalletAddress(userWalletAddress)
     return this.usersService.userHandler(userWalletAddress)
   }
-
-  // @Post()
-  // async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
-  //   // return this.usersService.createUser(createUserDto.userWalletAddress)
-  // }
 }

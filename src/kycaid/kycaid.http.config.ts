@@ -8,7 +8,7 @@ export class KYCAidHttpConfigService implements HttpModuleOptionsFactory {
   createHttpOptions(): HttpModuleOptions {
     return {
       baseURL: 'https://api.kycaid.com/',
-      timeout: this.configService.get<number>('axios.timeout'),
+      timeout: this.configService.get<number>('http.timeout'),
       headers: {
         Authorization: `Token ${this.configService.get<number>('kyc.token')}`,
       },

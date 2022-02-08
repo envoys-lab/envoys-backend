@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { GetFormUrl, KYCAidCallback } from 'src/kycaid/dto/kycaid.dto'
+import { VerificationStatus } from 'src/kycaid/interface/kycaid.db.structure'
 import { GetFormUrlResponse } from 'src/kycaid/interface/kycaid.respond'
 import { KYCAidService } from 'src/kycaid/kycaid.service'
+import { UserType } from 'src/users/entities/user.entity'
 import { KYCDatabase } from './kyc.repository'
 
 @Injectable()
@@ -63,15 +65,4 @@ export class KYCService {
       },
     })
   }
-}
-
-enum VerificationStatus {
-  UNUSED = 'unused',
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-}
-
-enum UserType {
-  COMPANY = 'COMPANY',
-  PERSON = 'PERSON',
 }

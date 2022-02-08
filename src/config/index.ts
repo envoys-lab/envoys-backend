@@ -4,7 +4,7 @@ export const server = registerAs('server', () => ({
   port: parseInt(process.env.SERVER_PORT) || 8080,
 }))
 
-export const axios = registerAs('axios', () => ({
+export const http = registerAs('http', () => ({
   timeout: parseInt(process.env.HTTP_TIMEOUT) || 5000,
 }))
 

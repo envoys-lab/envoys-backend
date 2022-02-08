@@ -22,7 +22,7 @@ interface VerificationResult {
   comment: string
 }
 
-enum VerificationStatus {
+export enum VerificationStatus {
   UNUSED = 'unused',
   PENDING = 'pending',
   COMPLETED = 'completed',

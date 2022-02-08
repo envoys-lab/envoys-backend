@@ -1,3 +1,5 @@
+import { VerificationStatus } from './kycaid.db.structure'
+
 export interface GetFormUrlResponse {
   form_id: string
   form_url: string
@@ -25,10 +27,4 @@ export interface GetVerificationResponse {
 interface VerificationResult {
   verified: boolean
   comment: string
-}
-
-enum VerificationStatus {
-  UNUSED = 'unused',
-  PENDING = 'pending',
-  COMPLETED = 'completed',
 }
