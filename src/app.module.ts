@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { UsersModule } from './users/users.module'
-import * as configuration from './config'
+import configuration from './config'
 import { TypeOrmConfigService } from './config/typeorm.config'
 import { KYCModule } from './kyc/kyc.module'
 
@@ -12,7 +10,7 @@ import { KYCModule } from './kyc/kyc.module'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration.server, configuration.database, configuration.kyc, configuration.http],
+      load: configuration,
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
@@ -21,7 +19,6 @@ import { KYCModule } from './kyc/kyc.module'
     UsersModule,
     KYCModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, TypeOrmConfigService],
+  providers: [TypeOrmConfigService],
 })
 export class AppModule {}
