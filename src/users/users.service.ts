@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { HttpException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { ethers } from 'ethers'
 import { Repository } from 'typeorm'
 import User from './entities/user.entity'
 
@@ -7,29 +8,34 @@ import User from './entities/user.entity'
 export class UsersService {
   constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
 
-  async getUserByWalletAddress(userWalletAddress: string, ifExistCheck = false): Promise<User> {
-    const fetchedUser = await this.usersRepository.findOne({ where: { userWalletAddress: userWalletAddress } })
-    if (!fetchedUser && !ifExistCheck) {
-      throw new NotFoundException('There is no user with such wallet address')
+  async userHandler(userWalletAddress: string): Promise<User> {
+    if (!ethers.utils.isAddress(userWalletAddress)) {
+      throw new HttpException('Invalid user wallet address', 406)
     }
-    if (fetchedUser && ifExistCheck) {
-      throw new BadRequestException('Wallet address is already registered')
+    const fetchedUser = await this.getUserByWalletAddress(userWalletAddress)
+    if (!fetchedUser) {
+      return this.createUser(userWalletAddress)
+    }
+
+    return fetchedUser
+  }
+
+  async getUserByWalletAddress(userWalletAddress: string): Promise<User> {
+    const fetchedUser = await this.usersRepository.findOne({ where: { userWalletAddress: userWalletAddress } })
+    if (!fetchedUser) {
+      return
     }
 
     return fetchedUser
   }
 
   async createUser(userWalletAddress: string): Promise<User> {
-    try {
-      await this.getUserByWalletAddress(userWalletAddress, true)
-    } catch (error) {
-      throw new BadRequestException(error.message)
-    }
-
+    await this.getUserByWalletAddress(userWalletAddress)
     const newUser: Partial<User> = await this.usersRepository.create({
       userWalletAddress: userWalletAddress,
       verification: {},
     })
+
     return this.usersRepository.save(newUser)
   }
 }

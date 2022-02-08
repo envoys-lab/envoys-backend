@@ -12,7 +12,7 @@ import { KYCModule } from './kyc/kyc.module'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration.server, configuration.database, configuration.kyc],
+      load: [configuration.server, configuration.database, configuration.kyc, configuration.axios],
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,

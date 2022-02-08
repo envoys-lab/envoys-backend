@@ -1,23 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import User from 'src/users/entities/user.entity'
-import { UserType, VerificationStatus } from 'src/kycaid/enum/user.enum'
 import { Repository } from 'typeorm'
 
 @Injectable()
-export class KYCAidDatabase {
+export class KYCDatabase {
   constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
 
-  async getUser(userWalletAddress?: string, verification_id?: string) {
-    let query = {}
-    if (userWalletAddress) {
-      query = { where: { userWalletAddress: userWalletAddress } }
-    }
-    if (verification_id) {
-      query = { where: { verification_id: verification_id } }
-    }
-
-    const fetchedUser = await this.usersRepository.findOne(query)
+  async getUserByUserWalletAddress(userWalletAddress: string) {
+    const fetchedUser = await this.usersRepository.findOne({ where: { userWalletAddress: userWalletAddress } })
     if (!fetchedUser) {
       throw new NotFoundException('Unable to find the user')
     }
@@ -25,8 +16,22 @@ export class KYCAidDatabase {
     return fetchedUser
   }
 
-  async updateUser(dto: Partial<User>, userWalletAddress: string) {
-    const fetchedUser = await this.getUser(userWalletAddress, null)
+  async getUserByVerificationId(verification_id: string) {
+    const fetchedUser = await this.usersRepository.findOne({ where: { verification_id: verification_id } })
+    if (!fetchedUser) {
+      throw new NotFoundException('Unable to find the user')
+    }
+
+    return fetchedUser
+  }
+
+  async updateUser(dto: Partial<User>) {
+    let fetchedUser
+    if (dto.userWalletAddress) {
+      fetchedUser = await this.getUserByUserWalletAddress(dto.userWalletAddress)
+    } else {
+      fetchedUser = await this.getUserByVerificationId(dto.verification_id)
+    }
 
     if (dto.userType in UserType) {
       fetchedUser.userType = dto.userType
@@ -55,4 +60,15 @@ export class KYCAidDatabase {
 
     return this.usersRepository.save(fetchedUser)
   }
+}
+
+enum VerificationStatus {
+  UNUSED = 'unused',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+}
+
+enum UserType {
+  COMPANY = 'COMPANY',
+  PERSON = 'PERSON',
 }

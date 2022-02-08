@@ -9,12 +9,12 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
       type: 'mongodb',
-      url: this.configService.get<string>('database.dbConnectionString'),
+      url: this.configService.get<string>('database.connectionString'),
       logging: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
       synchronize: true,
-      entities: ['dist/users/entities/user.entity.js'],
+      entities: ['dist/**/*.entity{ .ts,.js}'],
     }
   }
 }

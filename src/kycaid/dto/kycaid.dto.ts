@@ -1,5 +1,4 @@
 import { IsNotEmpty, Validate } from 'class-validator'
-import { VerificationStatus } from 'src/kycaid/enum/user.enum'
 import { IsWalletAddress } from 'src/users/validation/IsWalletAddress'
 
 export class GetFormUrl {
@@ -7,8 +6,7 @@ export class GetFormUrl {
   @IsNotEmpty()
   external_applicant_id: string
 
-  @IsNotEmpty()
-  redirect_url: string
+  redirect_url?: string
 }
 
 export class KYCAidCallback {
@@ -19,4 +17,10 @@ export class KYCAidCallback {
   status: VerificationStatus
   verified: boolean
   verifications: object
+}
+
+enum VerificationStatus {
+  UNUSED = 'unused',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
 }

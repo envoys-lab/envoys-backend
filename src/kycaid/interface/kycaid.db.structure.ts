@@ -1,10 +1,29 @@
-import { VerificationStatus } from 'src/kycaid/enum/user.enum'
-
 export interface KYCAidVerification {
   request_id: string
   applicant_id: string
   verified: boolean
   status: VerificationStatus
   type: string
-  verifications: object
+  verifications: {
+    profile?: VerificationResult
+    document?: VerificationResult
+    facial?: VerificationResult
+    address?: VerificationResult
+    aml?: VerificationResult
+    financial?: VerificationResult
+    payment_method?: VerificationResult
+    tax_id?: VerificationResult
+    company?: VerificationResult
+  }
+}
+
+interface VerificationResult {
+  verified: boolean
+  comment: string
+}
+
+enum VerificationStatus {
+  UNUSED = 'unused',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
 }

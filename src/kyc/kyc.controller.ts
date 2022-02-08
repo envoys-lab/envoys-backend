@@ -1,28 +1,32 @@
-import { Body, Controller, Get, Param, Post, Query, UseInterceptors } from '@nestjs/common'
+import { Body, Controller, Get, HttpException, Param, Post, Query } from '@nestjs/common'
 import { GetFormUrl, KYCAidCallback } from 'src/kycaid/dto/kycaid.dto'
-import { KYCAidGetRequestInterceptor } from 'src/kycaid/interceptor/kycaid.get.interceptor'
-import { KYCAidPostRequestInterceptor } from 'src/kycaid/interceptor/kycaid.post.interceptor'
-import { KYCAidService } from 'src/kycaid/kycaid.service'
-import { UserType } from 'src/kycaid/enum/user.enum'
+import { KYCService } from './kyc.service'
 
 @Controller('kyc')
 export class KYCController {
-  constructor(private readonly kycAidService: KYCAidService) {}
+  constructor(private readonly kycService: KYCService) {}
 
-  @Get('new/:userWalletAddress')
-  @UseInterceptors(KYCAidPostRequestInterceptor)
+  @Get('forms/:userWalletAddress')
   async getFormUrl(@Query('type') userType: UserType, @Body() dto: GetFormUrl) {
-    return this.kycAidService.getFormUrl(userType, dto)
+    if (userType) {
+      return this.kycService.getFormUrl(userType, dto)
+    } else {
+      throw new HttpException('Specify user type', 406)
+    }
   }
 
   @Get('status/:userWalletAddress')
-  @UseInterceptors(KYCAidGetRequestInterceptor)
   async getVerification(@Param('userWalletAddress') userWalletAddress: string) {
-    return this.kycAidService.getVerification(userWalletAddress)
+    return this.kycService.getVerification(userWalletAddress)
   }
 
   @Post('callback')
   async processCallback(@Body() dto: KYCAidCallback) {
-    return this.kycAidService.processCallback(dto)
+    return this.kycService.callbackHandler(dto)
   }
+}
+
+enum UserType {
+  COMPANY = 'COMPANY',
+  PERSON = 'PERSON',
 }

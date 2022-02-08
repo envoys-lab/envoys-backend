@@ -4,8 +4,12 @@ export const server = registerAs('server', () => ({
   port: parseInt(process.env.SERVER_PORT) || 8080,
 }))
 
+export const axios = registerAs('axios', () => ({
+  timeout: parseInt(process.env.HTTP_TIMEOUT) || 5000,
+}))
+
 export const database = registerAs('database', () => ({
-  dbConnectionString: process.env.DB_CONNECTION_STRING,
+  connectionString: process.env.DB_CONNECTION_STRING,
 }))
 
 export const kyc = registerAs('kyc', () => ({

@@ -1,6 +1,5 @@
 import { BaseEntity, Column, Entity, ObjectIdColumn } from 'typeorm'
 import { KYCAidVerification } from 'src/kycaid/interface/kycaid.db.structure'
-import { UserType } from 'src/kycaid/enum/user.enum'
 
 @Entity({ name: 'Users' })
 export default class User extends BaseEntity {
@@ -18,4 +17,9 @@ export default class User extends BaseEntity {
 
   @Column()
   verification: Partial<KYCAidVerification>
+}
+
+enum UserType {
+  COMPANY = 'COMPANY',
+  PERSON = 'PERSON',
 }
