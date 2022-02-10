@@ -4,6 +4,30 @@ services:
   app:
     build: .
     environment:
-      SERVER_PORT: 3000
+      SERVER_PORT: ${SERVER_PORT}
+      DB_CONNECTION_STRING: mongodb://user:${MONGO_USER_PASSWORD}@mongodb:27017/${MONGO_DATABASE}
+      KYC_TOKEN: <!!!>
+      KYC_FORM_ID_PERSON: <!!!>
+      KYC_FORM_ID_COMPANY: <!!!>
     ports:
-      - "3000:3000"
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:4.4
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: TyYTfVzz5znX9AZy
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+      MONGO_USER: user
+      MONGO_PASSWORD: ${MONGO_USER_PASSWORD}
+    volumes:
+      - mongodb_data:/data/db
+      - ./.circleci/mongo/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodb_data:

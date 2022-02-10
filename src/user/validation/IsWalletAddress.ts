@@ -4,10 +4,7 @@ import { ethers } from 'ethers'
 @ValidatorConstraint({ name: 'IsWalletAddress' })
 export class IsWalletAddress implements ValidatorConstraintInterface {
   validate(walletAddress: string): boolean | Promise<boolean> {
-    if (ethers.utils.isAddress(walletAddress)) {
-      return true
-    }
-    return false
+    return ethers.utils.isAddress(walletAddress)
   }
 
   defaultMessage(): string {

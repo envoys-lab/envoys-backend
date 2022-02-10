@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+
+  app:
+    image: registry.beta.envoys.vision/envoys-backend:develop-${VERSION}
+    restart: always
+    environment:
+      SERVER_PORT: 3000
+      DB_CONNECTION_STRING: mongodb://user:GTjLedypWA3bETXT@mongodb:27017/envoys
+      KYC_TOKEN: 941332710711a147a638f3e13baed70957ee
+      KYC_FORM_ID_PERSON: 79f18d2a05e7124bb3188c20251e4b80f90b
+      KYC_FORM_ID_COMPANY: 5d248a6f0784524cb7199f60447dc9e7b3e0
+    expose:
+      - "3000"
+    networks:
+      - envoys-docker_default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.beta.envoys.vision`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.service=backend"
+      - "traefik.http.routers.backend.tls.certresolver=leresolver"
+
+networks:
+  envoys-docker_default:
+    external: true
