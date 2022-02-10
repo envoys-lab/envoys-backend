@@ -18,9 +18,13 @@ WORKDIR /opt/app
 
 COPY --from=build /usr/src/app/package.json ./
 COPY --from=build /usr/src/app/package-lock.json ./
+COPY --from=build /usr/src/app/tsconfig.build.json ./
+COPY --from=build /usr/src/app/tsconfig.json ./
+
+RUN sed -i 's/src\/config\/typeorm.config/dist\/config\/typeorm.config/g' package.json
 
 RUN npm install --only=production
 
 COPY --from=build /usr/src/app/dist ./dist
 
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:production"]

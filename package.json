@@ -12,7 +12,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:production": "node dist/main",
+    "start:production": "npm run migration:run && node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "test": "jest --passWithNoTests",
@@ -21,16 +21,17 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "check": "npm run build && npm run lint && npm run test",
-    "typeorm": "npm run build && node --loader ts-node/esm ./node_modules/typeorm/cli.js",
-    "migration:run": "npm run typeorm migration:run"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/config/typeorm.config",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",
-    "@nestjs/schematics": "^8.0.0",
+    "@nestjs/schematics": "^8.0.6",
     "@nestjs/testing": "^8.0.0",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.4.0",
-    "@types/node": "^16.11.22",
+    "@types/node": "^16.11.24",
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
@@ -44,8 +45,6 @@
     "supertest": "^6.1.3",
     "ts-jest": "^27.0.3",
     "ts-loader": "^9.2.3",
-    "ts-node": "^10.5.0",
-    "tsconfig-paths": "^3.10.1",
     "typescript": "^4.3.5"
   },
   "dependencies": {
@@ -59,7 +58,9 @@
     "class-validator": "^0.13.2",
     "ethers": "^5.5.4",
     "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.2.41"
+    "typeorm": "^0.2.41",
+    "ts-node": "^10.5.0",
+    "tsconfig-paths": "^3.12.0"
   },
   "jest": {
     "moduleFileExtensions": [
