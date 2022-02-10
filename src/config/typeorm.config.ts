@@ -14,12 +14,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       synchronize: false,
-      migrationsRun: true,
       entities: ['dist/**/*.entity{ .ts,.js}'],
-      migrations: ['dist/**/db/migrations/*{ .ts,.js}'],
-      cli: {
-        migrationsDir: 'db/migrations',
-      },
     }
   }
 }

@@ -1,14 +1,12 @@
 {
   "type": "mongodb",
-      "url": "",
-      "logging": true,
-      "useNewUrlParser": true,
-      "useUnifiedTopology": true,
-      "synchronize": false,
-      "migrationsRun": true,
-      "entities": ["dist/**/*.entity{ .ts,.js}"],
-      "migrations": ["dist/**/db/migrations/*{ .ts,.js}"],
-      "cli": {
-        "migrationsDir": "db/migrations"
-      }
+  "url": "",
+  "logging": true,
+  "useNewUrlParser": true,
+  "useUnifiedTopology": true,
+  "entities": ["dist/**/*.entity{ .ts,.js}"],
+  "migrations": ["dist/migrations/*{ .ts,.js}"],
+  "cli": {
+    "migrationsDir": "src/migrations"
+  }
 }
