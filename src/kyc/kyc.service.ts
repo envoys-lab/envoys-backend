@@ -1,46 +1,64 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { GetFormUrl, KYCAidCallback } from 'src/kycaid/dto/kycaid.dto'
-import { VerificationStatus } from 'src/kycaid/interface/kycaid.db.structure'
-import { GetFormUrlResponse } from 'src/kycaid/interface/kycaid.respond'
+import { CreateFormUrl, CreateFormUrlResponse, Verification, VerificationStatus } from 'src/kycaid/dto/kycaid.dto'
 import { KYCAidService } from 'src/kycaid/kycaid.service'
-import { UserType } from 'src/users/entities/user.entity'
-import { KYCDatabase } from './kyc.repository'
+import User, { UserType } from 'src/user/entity/user.entity'
+import { UserService } from '../user/user.service'
+import { ObjectID } from 'typeorm'
 
 @Injectable()
 export class KYCService {
-  constructor(private configService: ConfigService, private repository: KYCDatabase, private kycAidService: KYCAidService) {}
+  private readonly personFormId
+  private readonly companyFormId
 
-  async getFormUrl(userType: UserType, dto: GetFormUrl) {
-    let form_id
-    if (userType == UserType.PERSON) {
-      form_id = this.configService.get<number>('kyc.personFormId')
+  constructor(private configService: ConfigService, private userService: UserService, private kycAidService: KYCAidService) {
+    this.personFormId = this.configService.get<number>('kyc.personFormId')
+    this.companyFormId = this.configService.get<number>('kyc.companyFormId')
+  }
+
+  async createFormUrl(userId: ObjectID, userType: UserType, redirectUrl?: string) {
+    const user: User = await this.userService.getUserById(userId)
+    const formId = this.getFormIdByUserType(userType)
+
+    const body: CreateFormUrl = {
+      external_applicant_id: user._id.toString(),
+      redirect_url: redirectUrl,
     }
-    if (userType == UserType.COMPANY) {
-      form_id = this.configService.get<number>('kyc.companyFormId')
-    } // dto.rederict_url
-    const fetchedData: GetFormUrlResponse = await this.kycAidService.getFormUrl(form_id, dto)
 
-    this.repository.updateUser({
-      userWalletAddress: dto.external_applicant_id,
+    const fetchedData: CreateFormUrlResponse = await this.kycAidService.createFormUrl(formId, body)
+
+    await this.userService.updateUser({
+      _id: user._id,
       userType: userType,
-      verification_id: fetchedData.verification_id,
+      verificationId: fetchedData.verification_id,
       verification: {
         status: VerificationStatus.UNUSED,
         verified: false,
       },
     })
 
-    return { form_url: fetchedData.form_url }
+    return { formUrl: fetchedData.form_url }
   }
 
-  async getVerification(userWalletAddress: string) {
-    const fetchedUser = await this.repository.getUserByUserWalletAddress(userWalletAddress)
-    const fetchedData = await this.kycAidService.getVerification(fetchedUser.verification_id)
+  private getFormIdByUserType(userType: UserType): string {
+    switch (userType) {
+      case UserType.PERSON:
+        return this.personFormId
+      case UserType.COMPANY:
+        return this.companyFormId
+    }
+  }
 
-    this.repository.updateUser({
-      userWalletAddress: userWalletAddress,
-      verification_id: fetchedData.verification_id,
+  async refreshVerification(userId: ObjectID) {
+    const user = await this.userService.getUserById(userId)
+    if (!user.verificationId) {
+      throw new BadRequestException('No verification data found. You need to start verification at first.')
+    }
+
+    const fetchedData = await this.kycAidService.getVerification(user.verificationId)
+
+    return this.userService.updateUser({
+      _id: user._id,
       verification: {
         applicant_id: fetchedData.applicant_id,
         status: fetchedData.status,
@@ -48,13 +66,11 @@ export class KYCService {
         verifications: fetchedData.verifications,
       },
     })
-
-    return fetchedData
   }
 
-  callbackHandler(dto: KYCAidCallback) {
-    this.repository.updateUser({
-      verification_id: dto.verification_id,
+  async callbackHandler(dto: Verification) {
+    await this.userService.updateUser({
+      verificationId: dto.verification_id,
       verification: {
         request_id: dto.request_id,
         applicant_id: dto.applicant_id,

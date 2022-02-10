@@ -1,28 +1,24 @@
-import { Body, Controller, Get, HttpException, Param, Post, Query } from '@nestjs/common'
-import { GetFormUrl, KYCAidCallback } from 'src/kycaid/dto/kycaid.dto'
-import { UserType } from 'src/users/entities/user.entity'
+import { Body, Controller, Param, Post } from '@nestjs/common'
 import { KYCService } from './kyc.service'
+import { CreateFormUrlBody, CreateFormUrlParams, RefreshVerificationParams } from './dto/kyc.controller.dto'
+import { Verification } from '../kycaid/dto/kycaid.dto'
 
-@Controller('kyc')
+@Controller('users')
 export class KYCController {
   constructor(private readonly kycService: KYCService) {}
 
-  @Get('forms/:userWalletAddress')
-  async getFormUrl(@Query('type') userType: UserType, @Body() dto: GetFormUrl) {
-    if (userType) {
-      return this.kycService.getFormUrl(userType, dto)
-    } else {
-      throw new HttpException('Specify user type', 406)
-    }
+  @Post(':userId/verification/:userType/create')
+  async createFormUrl(@Param() params: CreateFormUrlParams, @Body() body: CreateFormUrlBody) {
+    return this.kycService.createFormUrl(params.userId, params.userType, body.redirectUrl)
   }
 
-  @Get('status/:userWalletAddress')
-  async getVerification(@Param('userWalletAddress') userWalletAddress: string) {
-    return this.kycService.getVerification(userWalletAddress)
+  @Post(':userId/verification/refresh')
+  async refreshVerification(@Param() params: RefreshVerificationParams) {
+    return this.kycService.refreshVerification(params.userId)
   }
 
-  @Post('callback')
-  async processCallback(@Body() dto: KYCAidCallback) {
+  @Post('verification/callback')
+  async processVerificationCallback(@Body() dto: Verification) {
     return this.kycService.callbackHandler(dto)
   }
 }

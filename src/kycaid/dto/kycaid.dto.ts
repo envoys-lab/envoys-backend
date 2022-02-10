@@ -1,7 +1,7 @@
 import { IsNotEmpty, Validate } from 'class-validator'
-import { IsWalletAddress } from 'src/users/validation/IsWalletAddress'
+import { IsWalletAddress } from 'src/user/validation/IsWalletAddress'
 
-export class GetFormUrl {
+export class CreateFormUrl {
   @Validate(IsWalletAddress)
   @IsNotEmpty()
   external_applicant_id: string
@@ -9,18 +9,44 @@ export class GetFormUrl {
   redirect_url?: string
 }
 
-export class KYCAidCallback {
-  request_id: string
-  type: string
+export interface CreateFormUrlResponse {
+  form_id: string
+  form_url: string
   verification_id: string
-  applicant_id: string
-  status: VerificationStatus
-  verified: boolean
-  verifications: object
 }
 
-enum VerificationStatus {
+export interface GetVerificationResponse {
+  verification_id: string
+  status: VerificationStatus
+  applicant_id?: string
+  verified?: boolean
+  verifications?: VerificationItem
+}
+
+export enum VerificationStatus {
   UNUSED = 'unused',
   PENDING = 'pending',
   COMPLETED = 'completed',
+}
+
+export interface VerificationItem {
+  profile?: VerificationResult
+  document?: VerificationResult
+  facial?: VerificationResult
+  address?: VerificationResult
+  aml?: VerificationResult
+  financial?: VerificationResult
+  payment_method?: VerificationResult
+  tax_id?: VerificationResult
+  company?: VerificationResult
+}
+
+export interface VerificationResult {
+  verified: boolean
+  comment: string
+}
+
+export interface Verification extends GetVerificationResponse {
+  request_id: string
+  type: string
 }

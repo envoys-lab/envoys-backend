@@ -1,6 +1,6 @@
 import { MigrationInterface } from 'typeorm'
 import { MongoQueryRunner } from 'typeorm/driver/mongodb/MongoQueryRunner'
-import User, { UserType } from 'src/users/entities/user.entity'
+import User, { UserType } from 'src/user/entity/user.entity'
 
 const DEFAULT_WALLET_ADDRESS = '0x484D3D5Bbc8114B794767AeabDeCf7887FDd04C2'
 

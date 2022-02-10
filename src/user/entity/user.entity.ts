@@ -1,22 +1,22 @@
-import { BaseEntity, Column, Entity, ObjectIdColumn } from 'typeorm'
-import { KYCAidVerification } from 'src/kycaid/interface/kycaid.db.structure'
+import { BaseEntity, Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm'
+import { Verification } from '../../kycaid/dto/kycaid.dto'
 
 @Entity({ name: 'Users' })
 export default class User extends BaseEntity {
   @ObjectIdColumn()
-  _id: number
+  _id: ObjectID
 
   @Column()
   userWalletAddress: string
 
   @Column()
-  verification_id: string
+  verificationId: string
 
   @Column()
   userType: UserType
 
   @Column()
-  verification: Partial<KYCAidVerification>
+  verification: Partial<Verification>
 }
 
 export enum UserType {

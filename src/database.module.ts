@@ -8,6 +8,5 @@ import { TypeOrmConfigService } from './config/typeorm.config'
       useClass: TypeOrmConfigService,
     }),
   ],
-  providers: [TypeOrmConfigService],
 })
 export class DatabaseModule {}

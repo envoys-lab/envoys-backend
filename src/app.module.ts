@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { UsersModule } from './users/users.module'
+import { UserModule } from './user/user.module'
 import configuration from './config'
-import { TypeOrmConfigService } from './config/typeorm.config'
 import { KYCModule } from './kyc/kyc.module'
 import { DatabaseModule } from './database.module'
 
@@ -13,9 +12,8 @@ import { DatabaseModule } from './database.module'
       load: configuration,
     }),
     DatabaseModule,
-    UsersModule,
+    UserModule,
     KYCModule,
   ],
-  providers: [TypeOrmConfigService],
 })
 export class AppModule {}

@@ -13,7 +13,6 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
 }
 
 function prepareConfiguration(connectionString: string): TypeOrmModuleOptions {
-  getMigrationDir()
   return {
     type: 'mongodb',
     url: connectionString,
