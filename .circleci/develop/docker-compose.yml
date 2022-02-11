@@ -22,10 +22,6 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
       - "traefik.http.routers.backend.service=backend"
       - "traefik.http.routers.backend.tls.certresolver=leresolver"
-      - "traefik.http.middlewares.testheader.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
-      - "traefik.http.middlewares.testheader.headers.accesscontrolalloworigin=*"
-      - "traefik.http.middlewares.testheader.headers.accesscontrolmaxage=100"
-      - "traefik.http.middlewares.testheader.headers.addvaryheader=true"
 
 networks:
   envoys-docker_default:
