@@ -7,9 +7,9 @@ import { Verification } from '../kycaid/dto/kycaid.dto'
 export class KYCController {
   constructor(private readonly kycService: KYCService) {}
 
-  @Post(':userId/verification/:userType/create')
-  async createFormUrl(@Param() params: CreateFormUrlParams, @Body() body: CreateFormUrlBody) {
-    return this.kycService.createFormUrl(params.userId, params.userType, body.redirectUrl)
+  @Post(':userId/verification/:userType/get')
+  async getFormUrl(@Param() params: CreateFormUrlParams, @Body() body: CreateFormUrlBody) {
+    return this.kycService.getFormUrl(params.userId, params.userType, body.redirectUrl)
   }
 
   @Post(':userId/verification/refresh')

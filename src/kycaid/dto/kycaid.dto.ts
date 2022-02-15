@@ -23,6 +23,11 @@ export interface GetVerificationResponse {
   verifications?: VerificationItem
 }
 
+export interface FormUrls {
+  companyFormUrl: string
+  personFormUrl: string
+}
+
 export enum VerificationStatus {
   UNUSED = 'unused',
   PENDING = 'pending',
@@ -44,6 +49,7 @@ export interface VerificationItem {
 export interface VerificationResult {
   verified: boolean
   comment: string
+  decline_reasons?: string[]
 }
 
 export interface Verification extends GetVerificationResponse {
