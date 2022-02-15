@@ -27,15 +27,25 @@ export class KYCService {
 
     const fetchedData: CreateFormUrlResponse = await this.kycAidService.createFormUrl(formId, body)
 
-    await this.userService.updateUser({
-      _id: user._id,
-      userType: userType,
-      verificationId: fetchedData.verification_id,
-      verification: {
-        status: VerificationStatus.UNUSED,
-        verified: false,
-      },
-    })
+    if (userType == UserType.PERSON) {
+      await this.userService.updateUser({
+        _id: user._id,
+        personVerificationId: fetchedData.verification_id,
+        personVerification: {
+          status: VerificationStatus.UNUSED,
+          verified: false,
+        },
+      })
+    } else if (userType == UserType.COMPANY) {
+      await this.userService.updateUser({
+        _id: user._id,
+        companyVerificationId: fetchedData.verification_id,
+        companyVerification: {
+          status: VerificationStatus.UNUSED,
+          verified: false,
+        },
+      })
+    }
 
     return { formUrl: fetchedData.form_url }
   }
@@ -51,34 +61,64 @@ export class KYCService {
 
   async refreshVerification(userId: ObjectID) {
     const user = await this.userService.getUserById(userId)
-    if (!user.verificationId) {
+    if (!user.companyVerificationId || !user.personVerificationId) {
       throw new BadRequestException('No verification data found. You need to start verification at first.')
     }
 
-    const fetchedData = await this.kycAidService.getVerification(user.verificationId)
+    let fetchedDataForPerson, fetchedDataForCompany
+    if (user.companyVerificationId) {
+      fetchedDataForPerson = await this.kycAidService.getVerification(user.personVerificationId)
+    }
+    if (user.personVerificationId) {
+      fetchedDataForCompany = await this.kycAidService.getVerification(user.companyVerificationId)
+    }
 
     return this.userService.updateUser({
       _id: user._id,
-      verification: {
-        applicant_id: fetchedData.applicant_id,
-        status: fetchedData.status,
-        verified: fetchedData.verified,
-        verifications: fetchedData.verifications,
+      personVerification: {
+        applicant_id: fetchedDataForPerson.applicant_id,
+        status: fetchedDataForPerson.status,
+        verified: fetchedDataForPerson.verified,
+        verifications: fetchedDataForPerson.verifications,
+      },
+      companyVerification: {
+        applicant_id: fetchedDataForCompany.applicant_id,
+        status: fetchedDataForCompany.status,
+        verified: fetchedDataForCompany.verified,
+        verifications: fetchedDataForCompany.verifications,
       },
     })
   }
 
   async callbackHandler(dto: Verification) {
-    await this.userService.updateUser({
-      verificationId: dto.verification_id,
-      verification: {
-        request_id: dto.request_id,
-        applicant_id: dto.applicant_id,
-        type: dto.type,
-        status: dto.status,
-        verified: dto.verified,
-        verifications: dto.verifications,
-      },
-    })
+    const user = await this.userService.getUserByVerificationId(dto.verification_id)
+    console.log(user)
+    if (user.companyVerificationId == dto.verification_id) {
+      await this.userService.updateUser({
+        companyVerificationId: dto.verification_id,
+        companyVerification: {
+          request_id: dto.request_id,
+          applicant_id: dto.applicant_id,
+          type: dto.type,
+          status: dto.status,
+          verified: dto.verified,
+          verifications: dto.verifications,
+        },
+      })
+    } else if (user.personVerificationId == dto.verification_id) {
+      await this.userService.updateUser({
+        personVerificationId: dto.verification_id,
+        personVerification: {
+          request_id: dto.request_id,
+          applicant_id: dto.applicant_id,
+          type: dto.type,
+          status: dto.status,
+          verified: dto.verified,
+          verifications: dto.verifications,
+        },
+      })
+    } else {
+      throw new BadRequestException('Cannot find user')
+    }
   }
 }

@@ -8,7 +8,6 @@ export class Users1644411155649 implements MigrationInterface {
   async up(queryRunner: MongoQueryRunner): Promise<void> {
     const user = new User()
     user.userWalletAddress = DEFAULT_WALLET_ADDRESS
-    user.userType = UserType.PERSON
 
     await queryRunner.insertOne('Users', user)
   }
