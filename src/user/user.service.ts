@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ObjectID, Repository } from 'typeorm'
-import User from './entity/user.entity'
+import User, { UserType } from './entity/user.entity'
 
 @Injectable()
 export class UserService {
@@ -35,18 +35,25 @@ export class UserService {
   }
 
   async getUserByVerificationId(verificationId: string) {
-    const fetchedUser = await this.userRepository.findOne({ where: { verificationId: verificationId } })
-    if (!fetchedUser) {
+    const fetchedUserCompanyVerificationId = await this.userRepository.findOne({
+      where: { companyVerificationId: verificationId },
+    })
+    const fetchedUserPersonVerificationId = await this.userRepository.findOne({
+      where: { personVerificationId: verificationId },
+    })
+
+    if (!fetchedUserCompanyVerificationId && !fetchedUserPersonVerificationId) {
       throw new NotFoundException(`Unable to find the user by verification id: ${verificationId}`)
     }
 
-    return fetchedUser
+    return fetchedUserPersonVerificationId ? fetchedUserPersonVerificationId : fetchedUserCompanyVerificationId
   }
 
   private async createUser(userWalletAddress: string): Promise<User> {
     const newUser: Partial<User> = this.userRepository.create({
       userWalletAddress: userWalletAddress,
-      verification: {},
+      companyVerification: {},
+      personVerification: {},
     })
 
     return this.userRepository.save(newUser)
@@ -59,8 +66,10 @@ export class UserService {
       fetchedUser = await this.getUserById(dto._id)
     } else if (dto.userWalletAddress) {
       fetchedUser = await this.getUserByWalletAddress(dto.userWalletAddress)
+    } else if (dto.companyVerificationId) {
+      fetchedUser = await this.getUserByVerificationId(dto.companyVerificationId)
     } else {
-      fetchedUser = await this.getUserByVerificationId(dto.verificationId)
+      fetchedUser = await this.getUserByVerificationId(dto.personVerificationId)
     }
 
     fetchedUser = {
