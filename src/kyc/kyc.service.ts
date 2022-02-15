@@ -61,38 +61,44 @@ export class KYCService {
 
   async refreshVerification(userId: ObjectID) {
     const user = await this.userService.getUserById(userId)
-    if (!user.companyVerificationId || !user.personVerificationId) {
+    if (!user.companyVerificationId && !user.personVerificationId) {
       throw new BadRequestException('No verification data found. You need to start verification at first.')
     }
 
     let fetchedDataForPerson, fetchedDataForCompany
-    if (user.companyVerificationId) {
-      fetchedDataForPerson = await this.kycAidService.getVerification(user.personVerificationId)
-    }
     if (user.personVerificationId) {
+      fetchedDataForPerson = await this.kycAidService.getVerification(user.personVerificationId)
+
+      this.userService.updateUser({
+        _id: user._id,
+        personVerification: {
+          applicant_id: fetchedDataForPerson.applicant_id,
+          status: fetchedDataForPerson.status,
+          verified: fetchedDataForPerson.verified,
+          verifications: fetchedDataForPerson.verifications,
+        },
+      })
+    }
+    if (user.companyVerificationId) {
       fetchedDataForCompany = await this.kycAidService.getVerification(user.companyVerificationId)
+
+      this.userService.updateUser({
+        _id: user._id,
+        companyVerification: {
+          applicant_id: fetchedDataForCompany.applicant_id,
+          status: fetchedDataForCompany.status,
+          verified: fetchedDataForCompany.verified,
+          verifications: fetchedDataForCompany.verifications,
+        },
+      })
     }
 
-    return this.userService.updateUser({
-      _id: user._id,
-      personVerification: {
-        applicant_id: fetchedDataForPerson.applicant_id,
-        status: fetchedDataForPerson.status,
-        verified: fetchedDataForPerson.verified,
-        verifications: fetchedDataForPerson.verifications,
-      },
-      companyVerification: {
-        applicant_id: fetchedDataForCompany.applicant_id,
-        status: fetchedDataForCompany.status,
-        verified: fetchedDataForCompany.verified,
-        verifications: fetchedDataForCompany.verifications,
-      },
-    })
+    return this.userService.getUserById(userId)
   }
 
   async callbackHandler(dto: Verification) {
     const user = await this.userService.getUserByVerificationId(dto.verification_id)
-    console.log(user)
+
     if (user.companyVerificationId == dto.verification_id) {
       await this.userService.updateUser({
         companyVerificationId: dto.verification_id,
