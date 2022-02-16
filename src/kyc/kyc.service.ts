@@ -19,69 +19,47 @@ export class KYCService {
   async createFormUrl(userId: ObjectID, userType: UserType, redirectUrl?: string) {
     const user: User = await this.userService.getUserById(userId)
 
-    if (userType == UserType.PERSON) {
-      if (
-        !user.personVerification.status ||
-        (user.personVerification.status == VerificationStatus.COMPLETED && !user.personVerification.verified)
-      ) {
-        const fetchedData = await this.requestFormUrl(userId, userType, redirectUrl)
+    const userTypeKey = userType.toLowerCase()
+    const userKYCStatus = user[userTypeKey].verification.status
+    const isUserVefified = user[userTypeKey].verification.verified
 
-        await this.userService.updateUser({
-          _id: user._id,
-          formURLs: { ...user.formURLs, personFormUrl: fetchedData.form_url },
-          personVerificationId: fetchedData.verification_id,
-          personVerification: {
-            ...user.personVerification,
-            status: VerificationStatus.UNUSED,
-            verified: false,
-          },
-        })
-
-        return { formUrl: fetchedData.form_url }
-      }
-
-      if (user.personVerification.status == VerificationStatus.UNUSED) {
-        return { formUrl: user.formURLs.personFormUrl }
-      }
-
-      throw new BadRequestException('It is impossible to get formUrl')
-    } else if (userType == UserType.COMPANY) {
-      if (
-        !user.companyVerification.status ||
-        (user.companyVerification.status == VerificationStatus.COMPLETED && !user.companyVerification.verified)
-      ) {
-        const fetchedData = await this.requestFormUrl(userId, userType, redirectUrl)
-
-        await this.userService.updateUser({
-          _id: user._id,
-          formURLs: { ...user.formURLs, companyFormUrl: fetchedData.form_url },
-          companyVerificationId: fetchedData.verification_id,
-          companyVerification: {
-            ...user.companyVerification,
-            status: VerificationStatus.UNUSED,
-            verified: false,
-          },
-        })
-
-        return { formUrl: fetchedData.form_url }
-      }
-
-      if (user.companyVerification.status == VerificationStatus.UNUSED) {
-        return { formUrl: user.formURLs.companyFormUrl }
-      }
-
-      throw new BadRequestException('It is impossible to get formUrl')
+    if (!userKYCStatus || (userKYCStatus == VerificationStatus.COMPLETED && !isUserVefified)) {
+      return this.requestFormUrl(user, userType, redirectUrl)
     }
+
+    if (userKYCStatus == VerificationStatus.UNUSED) {
+      return { formUrl: user[userTypeKey].formUrl }
+    }
+
+    throw new BadRequestException('It is impossible to get formUrl')
   }
 
-  private async requestFormUrl(userId: ObjectID, userType: UserType, redirectUrl: string) {
+  private async requestFormUrl(user: User, userType: UserType, redirectUrl: string) {
     const formId = this.getFormIdByUserType(userType)
     const body: CreateFormUrl = {
-      external_applicant_id: userId.toString(),
+      external_applicant_id: user._id.toString(),
       redirect_url: redirectUrl,
     }
 
-    return (await this.kycAidService.createFormUrl(formId, body)) as CreateFormUrlResponse
+    const fetchedData = await this.kycAidService.createFormUrl(formId, body)
+    await this.updateUserData(user, userType, fetchedData)
+
+    return { formUrl: fetchedData.form_url }
+  }
+
+  private async updateUserData(user: User, userType: UserType, data: CreateFormUrlResponse) {
+    await this.userService.updateUser({
+      _id: user._id,
+      [userType.toLowerCase()]: {
+        verificationId: data.verification_id,
+        formUrl: data.form_url,
+        verification: {
+          ...user.company.verification,
+          status: VerificationStatus.UNUSED,
+          verified: false,
+        },
+      },
+    })
   }
 
   private getFormIdByUserType(userType: UserType): string {
@@ -95,68 +73,62 @@ export class KYCService {
 
   async refreshVerification(userId: ObjectID) {
     const user = await this.userService.getUserById(userId)
-    if (!user.companyVerificationId && !user.personVerificationId) {
+    if (!user.person.verificationId && !user.company.verificationId) {
       throw new BadRequestException('No verification data found. You need to start verification at first.')
     }
 
-    if (user.personVerificationId) {
-      const fetchedDataForPerson = await this.kycAidService.getVerification(user.personVerificationId)
-      const { verification_id, ...newDto } = fetchedDataForPerson
+    let fetchedData, userTypeKey
+    if (user.person.verificationId) {
+      fetchedData = await this.kycAidService.getVerification(user.person.verificationId)
+      userTypeKey = 'person'
+    } else if (user.company.verificationId) {
+      fetchedData = await this.kycAidService.getVerification(user.company.verificationId)
+      userTypeKey = 'company'
+    } else {
+      throw new BadRequestException('Cannot resolve the user by verification id')
+    }
 
-      this.userService.updateUser({
-        _id: user._id,
-        personVerification: {
-          ...user.personVerification,
+    const { verification_id, ...newDto } = fetchedData
+    this.userService.updateUser({
+      _id: user._id,
+      [userTypeKey]: {
+        verification: {
+          ...user[userTypeKey].verification,
           ...newDto,
         },
-      })
-    }
-    if (user.companyVerificationId) {
-      const fetchedDataForCompany = await this.kycAidService.getVerification(user.companyVerificationId)
-      const { verification_id, ...newDto } = fetchedDataForCompany
-
-      this.userService.updateUser({
-        _id: user._id,
-        companyVerification: {
-          ...user.companyVerification,
-          ...newDto,
-        },
-      })
-    }
+      },
+    })
 
     const fetchedUser = await this.userService.getUserById(userId)
 
     return {
-      companyVerification: { ...fetchedUser.companyVerification },
-      personVerification: { ...fetchedUser.personVerification },
+      person: { ...fetchedUser.person.verification },
+      company: { ...fetchedUser.company.verification },
     }
   }
 
   async callbackHandler(dto: Verification) {
     const user: User = await this.userService.getUserByVerificationId(dto.verification_id)
 
-    if (user.companyVerificationId == dto.verification_id) {
-      const { verification_id, ...newDto } = dto
-
-      await this.userService.updateUser({
-        companyVerificationId: user.companyVerificationId,
-        companyVerification: {
-          ...user.companyVerification,
-          ...newDto,
-        },
-      })
-    } else if (user.personVerificationId == dto.verification_id) {
-      const { verification_id, ...newDto } = dto
-
-      await this.userService.updateUser({
-        personVerificationId: user.personVerificationId,
-        personVerification: {
-          ...user.personVerification,
-          ...newDto,
-        },
-      })
+    let userType
+    if (user.person.verificationId == dto.verification_id) {
+      userType = 'person'
+    } else if (user.company.verificationId == dto.verification_id) {
+      userType = 'company'
     } else {
-      throw new BadRequestException('Cannot find user')
+      throw new BadRequestException('Cannot resolve the user by verification id')
     }
+
+    const { verification_id, ...newDto } = dto
+    await this.userService.updateUser({
+      ...user,
+      [userType]: {
+        ...user[userType],
+        verification: {
+          ...user[userType].verification,
+          ...newDto,
+        },
+      },
+    })
   }
 }

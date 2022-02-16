@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm'
-import { FormUrls, Verification } from '../../kycaid/dto/kycaid.dto'
+import { Verification } from '../../kycaid/dto/kycaid.dto'
 
 @Entity({ name: 'Users' })
 export default class User extends BaseEntity {
@@ -10,19 +10,16 @@ export default class User extends BaseEntity {
   userWalletAddress: string
 
   @Column()
-  companyVerificationId: string
+  company: UserModel
 
   @Column()
-  personVerificationId: string
+  person: UserModel
+}
 
-  @Column()
-  formURLs: Partial<FormUrls>
-
-  @Column()
-  companyVerification: Partial<Verification>
-
-  @Column()
-  personVerification: Partial<Verification>
+export interface UserModel {
+  verificationId?: string
+  formUrl?: string
+  verification: Partial<Verification>
 }
 
 export enum UserType {
