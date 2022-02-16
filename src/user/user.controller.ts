@@ -8,8 +8,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get(':id')
-  async getUserById(@Param() params: GetUserByIdParams): Promise<User> {
-    return this.userService.getUserById(params.id)
+  async getUserById(@Param() params: GetUserByIdParams): Promise<Partial<User>> {
+    const user = await this.userService.getUserById(params.id)
+    const { formURLs, ...userWithoutUrls } = user
+
+    return { ...userWithoutUrls }
   }
 
   @Post(':userWalletAddress')

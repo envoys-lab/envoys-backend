@@ -12,42 +12,76 @@ export class KYCService {
   private readonly companyFormId
 
   constructor(private configService: ConfigService, private userService: UserService, private kycAidService: KYCAidService) {
-    this.personFormId = this.configService.get<number>('kyc.personFormId')
-    this.companyFormId = this.configService.get<number>('kyc.companyFormId')
+    this.personFormId = this.configService.get<string>('kyc.personFormId')
+    this.companyFormId = this.configService.get<string>('kyc.companyFormId')
   }
 
   async createFormUrl(userId: ObjectID, userType: UserType, redirectUrl?: string) {
     const user: User = await this.userService.getUserById(userId)
-    const formId = this.getFormIdByUserType(userType)
 
+    if (userType == UserType.PERSON) {
+      if (
+        !user.personVerification.status ||
+        (user.personVerification.status == VerificationStatus.COMPLETED && !user.personVerification.verified)
+      ) {
+        const fetchedData = await this.requestFormUrl(userId, userType, redirectUrl)
+
+        await this.userService.updateUser({
+          _id: user._id,
+          formURLs: { ...user.formURLs, personFormUrl: fetchedData.form_url },
+          personVerificationId: fetchedData.verification_id,
+          personVerification: {
+            ...user.personVerification,
+            status: VerificationStatus.UNUSED,
+            verified: false,
+          },
+        })
+
+        return { formUrl: fetchedData.form_url }
+      }
+
+      if (user.personVerification.status == VerificationStatus.UNUSED) {
+        return { formUrl: user.formURLs.personFormUrl }
+      }
+
+      throw new BadRequestException('It is impossible to get formUrl')
+    } else if (userType == UserType.COMPANY) {
+      if (
+        !user.companyVerification.status ||
+        (user.companyVerification.status == VerificationStatus.COMPLETED && !user.companyVerification.verified)
+      ) {
+        const fetchedData = await this.requestFormUrl(userId, userType, redirectUrl)
+
+        await this.userService.updateUser({
+          _id: user._id,
+          formURLs: { ...user.formURLs, companyFormUrl: fetchedData.form_url },
+          companyVerificationId: fetchedData.verification_id,
+          companyVerification: {
+            ...user.companyVerification,
+            status: VerificationStatus.UNUSED,
+            verified: false,
+          },
+        })
+
+        return { formUrl: fetchedData.form_url }
+      }
+
+      if (user.companyVerification.status == VerificationStatus.UNUSED) {
+        return { formUrl: user.formURLs.companyFormUrl }
+      }
+
+      throw new BadRequestException('It is impossible to get formUrl')
+    }
+  }
+
+  private async requestFormUrl(userId: ObjectID, userType: UserType, redirectUrl: string) {
+    const formId = this.getFormIdByUserType(userType)
     const body: CreateFormUrl = {
-      external_applicant_id: user._id.toString(),
+      external_applicant_id: userId.toString(),
       redirect_url: redirectUrl,
     }
 
-    const fetchedData: CreateFormUrlResponse = await this.kycAidService.createFormUrl(formId, body)
-
-    if (userType == UserType.PERSON) {
-      await this.userService.updateUser({
-        _id: user._id,
-        personVerificationId: fetchedData.verification_id,
-        personVerification: {
-          status: VerificationStatus.UNUSED,
-          verified: false,
-        },
-      })
-    } else if (userType == UserType.COMPANY) {
-      await this.userService.updateUser({
-        _id: user._id,
-        companyVerificationId: fetchedData.verification_id,
-        companyVerification: {
-          status: VerificationStatus.UNUSED,
-          verified: false,
-        },
-      })
-    }
-
-    return { formUrl: fetchedData.form_url }
+    return (await this.kycAidService.createFormUrl(formId, body)) as CreateFormUrlResponse
   }
 
   private getFormIdByUserType(userType: UserType): string {
@@ -65,62 +99,60 @@ export class KYCService {
       throw new BadRequestException('No verification data found. You need to start verification at first.')
     }
 
-    let fetchedDataForPerson, fetchedDataForCompany
     if (user.personVerificationId) {
-      fetchedDataForPerson = await this.kycAidService.getVerification(user.personVerificationId)
+      const fetchedDataForPerson = await this.kycAidService.getVerification(user.personVerificationId)
+      const { verification_id, ...newDto } = fetchedDataForPerson
 
       this.userService.updateUser({
         _id: user._id,
         personVerification: {
-          applicant_id: fetchedDataForPerson.applicant_id,
-          status: fetchedDataForPerson.status,
-          verified: fetchedDataForPerson.verified,
-          verifications: fetchedDataForPerson.verifications,
+          ...user.personVerification,
+          ...newDto,
         },
       })
     }
     if (user.companyVerificationId) {
-      fetchedDataForCompany = await this.kycAidService.getVerification(user.companyVerificationId)
+      const fetchedDataForCompany = await this.kycAidService.getVerification(user.companyVerificationId)
+      const { verification_id, ...newDto } = fetchedDataForCompany
 
       this.userService.updateUser({
         _id: user._id,
         companyVerification: {
-          applicant_id: fetchedDataForCompany.applicant_id,
-          status: fetchedDataForCompany.status,
-          verified: fetchedDataForCompany.verified,
-          verifications: fetchedDataForCompany.verifications,
+          ...user.companyVerification,
+          ...newDto,
         },
       })
     }
 
-    return this.userService.getUserById(userId)
+    const fetchedUser = await this.userService.getUserById(userId)
+
+    return {
+      companyVerification: { ...fetchedUser.companyVerification },
+      personVerification: { ...fetchedUser.personVerification },
+    }
   }
 
   async callbackHandler(dto: Verification) {
-    const user = await this.userService.getUserByVerificationId(dto.verification_id)
+    const user: User = await this.userService.getUserByVerificationId(dto.verification_id)
 
     if (user.companyVerificationId == dto.verification_id) {
+      const { verification_id, ...newDto } = dto
+
       await this.userService.updateUser({
-        companyVerificationId: dto.verification_id,
+        companyVerificationId: user.companyVerificationId,
         companyVerification: {
-          request_id: dto.request_id,
-          applicant_id: dto.applicant_id,
-          type: dto.type,
-          status: dto.status,
-          verified: dto.verified,
-          verifications: dto.verifications,
+          ...user.companyVerification,
+          ...newDto,
         },
       })
     } else if (user.personVerificationId == dto.verification_id) {
+      const { verification_id, ...newDto } = dto
+
       await this.userService.updateUser({
-        personVerificationId: dto.verification_id,
+        personVerificationId: user.personVerificationId,
         personVerification: {
-          request_id: dto.request_id,
-          applicant_id: dto.applicant_id,
-          type: dto.type,
-          status: dto.status,
-          verified: dto.verified,
-          verifications: dto.verifications,
+          ...user.personVerification,
+          ...newDto,
         },
       })
     } else {

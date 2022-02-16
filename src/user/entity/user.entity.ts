@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm'
-import { Verification } from '../../kycaid/dto/kycaid.dto'
+import { FormUrls, Verification } from '../../kycaid/dto/kycaid.dto'
 
 @Entity({ name: 'Users' })
 export default class User extends BaseEntity {
@@ -14,6 +14,9 @@ export default class User extends BaseEntity {
 
   @Column()
   personVerificationId: string
+
+  @Column()
+  formURLs: Partial<FormUrls>
 
   @Column()
   companyVerification: Partial<Verification>
