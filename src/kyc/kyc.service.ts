@@ -30,15 +30,15 @@ export class KYCService {
       isUserVefified = false
     }
 
-    if (!userStatus || (userStatus == VerificationStatus.COMPLETED && !isUserVefified)) {
-      return this.requestFormUrl(user, userType, redirectUrl)
-    }
-
     if (userStatus == VerificationStatus.UNUSED && user[userTypeKey].formUrl) {
       return { formUrl: user[userTypeKey].formUrl }
     }
 
-    throw new BadRequestException(`The KYC verification for ${userId} (${userType.toLowerCase()}) has been completed`)
+    if (userStatus == VerificationStatus.COMPLETED && isUserVefified) {
+      throw new BadRequestException(`The KYC verification for ${userId} (${userType.toLowerCase()}) has been completed`)
+    }
+
+    return this.requestFormUrl(user, userType, redirectUrl)
   }
 
   private async requestFormUrl(user: User, userType: UserType, redirectUrl: string) {
@@ -96,7 +96,7 @@ export class KYCService {
     }
 
     const { verification_id, ...newDto } = fetchedData
-    this.userService.updateUser({
+    await this.userService.updateUser({
       _id: user._id,
       [userTypeKey]: {
         verification: {
