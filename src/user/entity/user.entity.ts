@@ -10,16 +10,16 @@ export default class User extends BaseEntity {
   userWalletAddress: string
 
   @Column()
-  companyVerificationId: string
+  company: UserModel
 
   @Column()
-  personVerificationId: string
+  person: UserModel
+}
 
-  @Column()
-  companyVerification: Partial<Verification>
-
-  @Column()
-  personVerification: Partial<Verification>
+export interface UserModel {
+  verificationId?: string
+  formUrl?: string
+  verification: Partial<Verification>
 }
 
 export enum UserType {

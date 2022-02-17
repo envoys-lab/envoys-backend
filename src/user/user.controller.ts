@@ -8,7 +8,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get(':id')
-  async getUserById(@Param() params: GetUserByIdParams): Promise<User> {
+  async getUserById(@Param() params: GetUserByIdParams): Promise<Partial<User>> {
     return this.userService.getUserById(params.id)
   }
 

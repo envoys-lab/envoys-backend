@@ -44,6 +44,7 @@ export interface VerificationItem {
 export interface VerificationResult {
   verified: boolean
   comment: string
+  decline_reasons?: string[]
 }
 
 export interface Verification extends GetVerificationResponse {
