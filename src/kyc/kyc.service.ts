@@ -5,6 +5,7 @@ import { KYCAidService } from 'src/kycaid/kycaid.service'
 import User, { UserType } from 'src/user/entity/user.entity'
 import { UserService } from '../user/user.service'
 import { ObjectID } from 'typeorm'
+import e from 'express'
 
 @Injectable()
 export class KYCService {
@@ -122,17 +123,64 @@ export class KYCService {
     }
   }
 
+  async getApplicant(userId: ObjectID, userType: UserType) {
+    const user: User = await this.userService.getUserById(userId)
+
+    const userTypeKey = userType.toLowerCase()
+
+    if (!user[userTypeKey].verification) {
+      throw new BadRequestException('No verification data found. You need to start verification at first.')
+    }
+
+    if (user[userTypeKey].data) {
+      return { applicantData: { ...user[userTypeKey].data } }
+    }
+
+    let validKeys
+    if (userType == UserType.PERSON) {
+      validKeys = ['first_name', 'middle_name', 'last_name', 'residence_country', 'documents']
+    } else if (userType == UserType.COMPANY) {
+      validKeys = ['companyName', 'registration_country', 'business_activity', 'documents']
+    }
+
+    const fetchedData = await this.kycAidService.getApplicant(user[userTypeKey].verification.applicant_id)
+    Object.keys(fetchedData).forEach((key) => validKeys.includes(key) || delete fetchedData[key])
+
+    await this.userService.updateUser({
+      ...user,
+      [userTypeKey]: {
+        ...user[userTypeKey],
+        data: {
+          ...fetchedData,
+          documents: {
+            front_side: fetchedData.documents[0].front_side || null,
+            back_side: fetchedData.documents[0].back_side || null,
+          },
+        },
+      },
+    })
+
+    const fetchedUser: User = await this.userService.getUserById(userId)
+
+    return { applicantData: { ...fetchedUser[userType].data } }
+  }
+
   async callbackHandler(dto: Verification) {
     const user: User = await this.userService.getUserByVerificationId(dto.verification_id)
 
-    let userType
+    let userType, validKeys
     if (user.person.verificationId == dto.verification_id) {
       userType = 'person'
+      validKeys = ['first_name', 'middle_name', 'last_name', 'residence_country', 'documents']
     } else if (user.company.verificationId == dto.verification_id) {
       userType = 'company'
+      validKeys = ['companyName', 'registration_country', 'business_activity', 'documents']
     } else {
       throw new BadRequestException('Cannot resolve the user by verification id')
     }
+
+    const fetchedData = await this.kycAidService.getApplicant(dto.applicant_id)
+    Object.keys(fetchedData).forEach((key) => validKeys.includes(key) || delete fetchedData[key])
 
     const { verification_id, ...newDto } = dto
     await this.userService.updateUser({
@@ -142,6 +190,13 @@ export class KYCService {
         verification: {
           ...user[userType].verification,
           ...newDto,
+        },
+        data: {
+          ...fetchedData,
+          documents: {
+            front_side: fetchedData.documents[0].front_side || null,
+            back_side: fetchedData.documents[0].back_side || null,
+          },
         },
       },
     })

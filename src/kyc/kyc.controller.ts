@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Post } from '@nestjs/common'
 import { KYCService } from './kyc.service'
-import { CreateFormUrlBody, CreateFormUrlParams, RefreshVerificationParams } from './dto/kyc.controller.dto'
+import { CreateFormUrlBody, CreateFormUrlParams, GetApplicantParams, RefreshVerificationParams } from './dto/kyc.controller.dto'
 import { Verification } from '../kycaid/dto/kycaid.dto'
 
 @Controller('users')
@@ -15,6 +15,11 @@ export class KYCController {
   @Post(':userId/verification/refresh')
   async refreshVerification(@Param() params: RefreshVerificationParams) {
     return this.kycService.refreshVerification(params.userId)
+  }
+
+  @Post(':userId/applicant/:userType')
+  async getApplicant(@Param() params: GetApplicantParams) {
+    return this.kycService.getApplicant(params.userId, params.userType)
   }
 
   @Post('verification/callback')
