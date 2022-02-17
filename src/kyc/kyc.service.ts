@@ -20,18 +20,25 @@ export class KYCService {
     const user: User = await this.userService.getUserById(userId)
 
     const userTypeKey = userType.toLowerCase()
-    const userKYCStatus = user[userTypeKey].verification.status
-    const isUserVefified = user[userTypeKey].verification.verified
+    let userStatus, isUserVefified
 
-    if (!userKYCStatus || (userKYCStatus == VerificationStatus.COMPLETED && !isUserVefified)) {
+    if (user[userTypeKey].verification) {
+      userStatus = user[userTypeKey].verification.status
+      isUserVefified = user[userTypeKey].verification.verified
+    } else {
+      userStatus = null
+      isUserVefified = false
+    }
+
+    if (!userStatus || (userStatus == VerificationStatus.COMPLETED && !isUserVefified)) {
       return this.requestFormUrl(user, userType, redirectUrl)
     }
 
-    if (userKYCStatus == VerificationStatus.UNUSED) {
+    if (userStatus == VerificationStatus.UNUSED && user[userTypeKey].formUrl) {
       return { formUrl: user[userTypeKey].formUrl }
     }
 
-    throw new BadRequestException('It is impossible to get formUrl')
+    throw new BadRequestException(`The KYC verification for ${userId} (${userType.toLowerCase()}) has been completed`)
   }
 
   private async requestFormUrl(user: User, userType: UserType, redirectUrl: string) {

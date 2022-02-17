@@ -23,11 +23,6 @@ export interface GetVerificationResponse {
   verifications?: VerificationItem
 }
 
-export interface FormUrls {
-  companyFormUrl: string
-  personFormUrl: string
-}
-
 export enum VerificationStatus {
   UNUSED = 'unused',
   PENDING = 'pending',
