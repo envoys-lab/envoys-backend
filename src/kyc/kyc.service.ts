@@ -30,6 +30,14 @@ export class KYCService {
       isUserVefified = false
     }
 
+    if (
+      !userStatus ||
+      (userStatus != VerificationStatus.UNUSED && !user[userTypeKey].formUrl) ||
+      (userStatus == VerificationStatus.COMPLETED && !isUserVefified)
+    ) {
+      return this.requestFormUrl(user, userType, redirectUrl)
+    }
+
     if (userStatus == VerificationStatus.UNUSED && user[userTypeKey].formUrl) {
       return { formUrl: user[userTypeKey].formUrl }
     }
@@ -38,7 +46,7 @@ export class KYCService {
       throw new BadRequestException(`The KYC verification for ${userId} (${userType.toLowerCase()}) has been completed`)
     }
 
-    return this.requestFormUrl(user, userType, redirectUrl)
+    throw new BadRequestException(`The KYC verification for ${userId} (${userType.toLowerCase()}) is pending`)
   }
 
   private async requestFormUrl(user: User, userType: UserType, redirectUrl: string) {
