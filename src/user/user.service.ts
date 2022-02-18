@@ -35,18 +35,30 @@ export class UserService {
   }
 
   async getUserByVerificationId(verificationId: string) {
-    const fetchedUser = await this.userRepository.findOne({ where: { verificationId: verificationId } })
-    if (!fetchedUser) {
-      throw new NotFoundException(`Unable to find the user by verification id: ${verificationId}`)
+    const fetchedUserPersonVerificationId = await this.userRepository.findOne({
+      where: { 'company.verificationId': verificationId },
+    })
+
+    if (fetchedUserPersonVerificationId) {
+      return fetchedUserPersonVerificationId
     }
 
-    return fetchedUser
+    const fetchedUserCompanyVerificationId = await this.userRepository.findOne({
+      where: { 'person.verificationId': verificationId },
+    })
+
+    if (fetchedUserCompanyVerificationId) {
+      return fetchedUserCompanyVerificationId
+    }
+
+    throw new NotFoundException(`Unable to find the user by verification id: ${verificationId}`)
   }
 
   private async createUser(userWalletAddress: string): Promise<User> {
     const newUser: Partial<User> = this.userRepository.create({
       userWalletAddress: userWalletAddress,
-      verification: {},
+      company: { verification: {} },
+      person: { verification: {} },
     })
 
     return this.userRepository.save(newUser)
@@ -59,13 +71,22 @@ export class UserService {
       fetchedUser = await this.getUserById(dto._id)
     } else if (dto.userWalletAddress) {
       fetchedUser = await this.getUserByWalletAddress(dto.userWalletAddress)
-    } else {
-      fetchedUser = await this.getUserByVerificationId(dto.verificationId)
+    } else if (dto.person.verificationId != null) {
+      fetchedUser = await this.getUserByVerificationId(dto.person.verificationId)
+    } else if (dto.company.verificationId != null) {
+      fetchedUser = await this.getUserByVerificationId(dto.company.verificationId)
     }
 
     fetchedUser = {
       ...fetchedUser,
-      ...dto,
+      person: {
+        ...fetchedUser.person,
+        ...dto.person,
+      },
+      company: {
+        ...fetchedUser.company,
+        ...dto.company,
+      },
     }
 
     return this.userRepository.save(fetchedUser)
