@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Post } from '@nestjs/common'
 import { KYCService } from './kyc.service'
-import { CreateFormUrlBody, CreateFormUrlParams, GetApplicantParams, RefreshVerificationParams } from './dto/kyc.controller.dto'
+import { CreateFormUrlBody, CreateFormUrlParams, RefreshVerificationParams } from './dto/kyc.controller.dto'
 import { Verification } from '../kycaid/dto/kycaid.dto'
 
 @Controller('users')

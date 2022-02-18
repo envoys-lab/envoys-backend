@@ -5,7 +5,6 @@ import { KYCAidService } from 'src/kycaid/kycaid.service'
 import User, { UserType } from 'src/user/entity/user.entity'
 import { UserService } from '../user/user.service'
 import { ObjectID } from 'typeorm'
-import e from 'express'
 
 @Injectable()
 export class KYCService {
@@ -106,14 +105,14 @@ export class KYCService {
     const actualUserStatus = fetchedApplicantData.verification_status
 
     Object.keys(fetchedApplicantData).forEach((key) => validKeys.includes(key) || delete fetchedApplicantData[key])
+    delete fetchedVerificationData.verification_id
 
-    const { verification_id, ...newDto } = fetchedVerificationData
     await this.userService.updateUser({
       _id: user._id,
       [userTypeKey]: {
         verification: {
           ...user[userTypeKey].verification,
-          ...newDto,
+          ...fetchedVerificationData,
           status: actualUserStatus == 'pending' || actualUserStatus == 'processing' ? 'pending' : fetchedVerificationData.status,
         },
         data: {
@@ -149,16 +148,17 @@ export class KYCService {
     }
 
     const fetchedData = await this.kycAidService.getApplicant(dto.applicant_id)
-    Object.keys(fetchedData).forEach((key) => validKeys.includes(key) || delete fetchedData[key])
 
-    const { verification_id, ...newDto } = dto
+    Object.keys(fetchedData).forEach((key) => validKeys.includes(key) || delete fetchedData[key])
+    delete dto.verification_id
+
     await this.userService.updateUser({
       ...user,
       [userType]: {
         ...user[userType],
         verification: {
           ...user[userType].verification,
-          ...newDto,
+          ...dto,
         },
         data: {
           ...fetchedData,

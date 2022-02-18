@@ -20,11 +20,3 @@ export class RefreshVerificationParams {
   @IsMongoId()
   userId: ObjectID
 }
-
-export class GetApplicantParams {
-  @IsMongoId()
-  userId: ObjectID
-
-  @IsEnum(UserType)
-  userType: UserType
-}
