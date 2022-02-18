@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm'
-import { Verification } from '../../kycaid/dto/kycaid.dto'
+import { ApplicantDocuments, Verification } from '../../kycaid/dto/kycaid.dto'
 
 @Entity({ name: 'Users' })
 export default class User extends BaseEntity {
@@ -32,11 +32,6 @@ export interface ApplicantModel {
   companyName?: string
   registration_country?: string
   business_activity?: object
-}
-
-export interface ApplicantDocuments {
-  front_side?: string
-  back_side?: string
 }
 
 export enum UserType {

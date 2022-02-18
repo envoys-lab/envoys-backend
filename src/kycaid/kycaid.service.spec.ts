@@ -10,8 +10,8 @@ import {
   formUrl,
   getApplicantResponse,
   getVerificationResponse,
-} from './models/kycaid'
-import { userId, verificationId } from '../user/models/user'
+} from '../../test/mock/kycaid'
+import { userId, verificationId } from '../../test/mock/user'
 import { KYCAidService } from './kycaid.service'
 
 describe('KYCAidService', () => {

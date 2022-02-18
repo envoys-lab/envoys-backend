@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { userRecord, mockUserService, userId, userWalletAddress } from './models/user'
+import { userRecord, mockUserService, userId, userWalletAddress } from '../../test/mock/user'
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
 

@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { applicantId, userId, verificationId } from '../user/models/user'
+import { applicantId, userId, verificationId } from '../../test/mock/user'
 import { UserType } from '../user/entity/user.entity'
 import { KYCController } from './kyc.controller'
 import { KYCService } from './kyc.service'
 import { VerificationStatus } from '../kycaid/dto/kycaid.dto'
-import { callbackDto, getFormUrlDto, verificationDto } from './models/kyc'
+import { callbackDto, getFormUrlDto, verificationDto } from '../../test/mock/kyc'
 
 describe('KYCController', () => {
   let controller: KYCController

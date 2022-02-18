@@ -1,12 +1,5 @@
-import { IsNotEmpty, Validate } from 'class-validator'
-import { ApplicantDocuments } from '../../user/entity/user.entity'
-import { IsWalletAddress } from '../../user/validation/IsWalletAddress'
-
 export class CreateFormUrl {
-  @Validate(IsWalletAddress)
-  @IsNotEmpty()
   external_applicant_id: string
-
   redirect_url?: string
 }
 
@@ -34,6 +27,11 @@ export interface GetApplicantResponse {
   registration_country?: string
   business_activity?: object
   verification_status: string
+}
+
+export interface ApplicantDocuments {
+  front_side?: string
+  back_side?: string
 }
 
 export enum VerificationStatus {

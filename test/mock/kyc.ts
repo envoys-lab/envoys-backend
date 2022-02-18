@@ -1,5 +1,5 @@
-import { VerificationStatus } from '../../kycaid/dto/kycaid.dto'
-import { applicantId, userId, verificationId } from '../../user/models/user'
+import { VerificationStatus } from '../../src/kycaid/dto/kycaid.dto'
+import { applicantId, userId, verificationId } from './user'
 
 export const companyFormId = '678sdfsadas'
 export const personFormId = '678sdfsfsdnc'

@@ -19,13 +19,11 @@ export class KYCAidService {
 
   async getApplicant(applicantId: string): Promise<GetApplicantResponse> {
     const request = this.httpService.get(`applicants/${applicantId}`).pipe(map((response) => response.data))
-
     return lastValueFrom(request)
   }
 
   async getVerification(verificationId: string): Promise<GetVerificationResponse> {
     const request = this.httpService.get(`verifications/${verificationId}`).pipe(map((response) => response.data))
-
     return lastValueFrom(request)
   }
 }

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { userId, userRecord, mockRepository, verificationId, userWalletAddress } from './models/user'
+import { userId, userRecord, mockRepository, verificationId, userWalletAddress } from '../../test/mock/user'
 import User from './entity/user.entity'
 import { UserService } from './user.service'
 

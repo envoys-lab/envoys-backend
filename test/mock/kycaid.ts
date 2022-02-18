@@ -1,6 +1,6 @@
-import { verificationId } from '../../user/models/user'
-import { VerificationStatus } from '../dto/kycaid.dto'
+import { VerificationStatus } from '../../src/kycaid/dto/kycaid.dto'
 import { AxiosResponse } from 'axios'
+import { verificationId } from './user'
 
 export const formId = '6472g32ffys88x90cc8'
 export const formUrl = 'dgfdg'

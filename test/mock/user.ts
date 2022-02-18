@@ -1,5 +1,5 @@
 import { ObjectID } from 'mongodb'
-import User from 'src/user/entity/user.entity'
+import User from '../../src/user/entity/user.entity'
 
 export const userWalletAddress = '0x484D3D5Bbc8114B794767FecbDeCf7887FDd04C2'
 export const verificationId = '17efc59c0018c2360e0b6e14f8a13c1c0fb8'
