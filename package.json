@@ -60,7 +60,8 @@
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.41",
     "ts-node": "^10.5.0",
-    "tsconfig-paths": "^3.12.0"
+    "tsconfig-paths": "^3.12.0",
+    "mongodb": "^3.6.0"
   },
   "jest": {
     "moduleFileExtensions": [

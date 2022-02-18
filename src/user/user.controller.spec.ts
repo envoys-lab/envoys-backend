@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { userRecord, mockUserService, userId, userWalletAddress } from '../models/mock/user'
+import { userRecord, mockUserService, userId, userWalletAddress } from './models/user'
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
 
-describe('UsersController', () => {
+describe('UserController', () => {
   let controller: UserController
 
   beforeEach(async () => {

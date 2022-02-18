@@ -1,6 +1,6 @@
 import { IsNotEmpty, Validate } from 'class-validator'
-import { ApplicantDocuments } from 'src/user/entity/user.entity'
-import { IsWalletAddress } from 'src/user/validation/IsWalletAddress'
+import { ApplicantDocuments } from '../../user/entity/user.entity'
+import { IsWalletAddress } from '../../user/validation/IsWalletAddress'
 
 export class CreateFormUrl {
   @Validate(IsWalletAddress)

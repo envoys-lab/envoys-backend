@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { userId, userRecord, mockRepository, verificationId, userWalletAddress } from '../models/mock/user'
+import { userId, userRecord, mockRepository, verificationId, userWalletAddress } from './models/user'
 import User from './entity/user.entity'
 import { UserService } from './user.service'
 
@@ -48,7 +48,7 @@ describe('UserController', () => {
   describe('updateUser', () => {
     it('should update user record and return that using id', async () => {
       const userDto = {
-        id: userId,
+        _id: userId,
         ...userRecord,
       }
 
@@ -68,8 +68,10 @@ describe('UserController', () => {
 
     it('should update user record and return that using verification id', async () => {
       const userDto = {
-        verificationId: verificationId,
         ...userRecord,
+        company: {
+          verificationId: verificationId,
+        },
       }
 
       expect(await service.updateUser(userDto)).toEqual(userDto)

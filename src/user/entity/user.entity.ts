@@ -10,10 +10,10 @@ export default class User extends BaseEntity {
   userWalletAddress: string
 
   @Column()
-  company: UserModel
+  company: Partial<UserModel>
 
   @Column()
-  person: UserModel
+  person: Partial<UserModel>
 }
 
 export interface UserModel {

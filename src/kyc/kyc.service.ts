@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { CreateFormUrl, CreateFormUrlResponse, Verification, VerificationStatus } from 'src/kycaid/dto/kycaid.dto'
-import { KYCAidService } from 'src/kycaid/kycaid.service'
-import User, { UserType } from 'src/user/entity/user.entity'
+import { CreateFormUrl, CreateFormUrlResponse, Verification, VerificationStatus } from '../kycaid/dto/kycaid.dto'
+import { KYCAidService } from '../kycaid/kycaid.service'
+import User, { UserType } from '../user/entity/user.entity'
 import { UserService } from '../user/user.service'
 import { ObjectID } from 'typeorm'
 
