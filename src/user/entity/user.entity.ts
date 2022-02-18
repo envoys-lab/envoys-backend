@@ -1,26 +1,38 @@
 import { BaseEntity, Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm'
 import { ApplicantDocuments, Verification } from '../../kycaid/dto/kycaid.dto'
 
+export const userPersonKey = 'person'
+export const userCompanyKey = 'company'
+
 @Entity({ name: 'Users' })
-export default class User extends BaseEntity {
+export class User extends BaseEntity {
   @ObjectIdColumn()
   _id: ObjectID
 
   @Column()
-  userWalletAddress: string
+  userWalletAddress: string;
 
   @Column()
-  company: Partial<UserModel>
+  [userCompanyKey]: Partial<UserModel>;
 
   @Column()
-  person: Partial<UserModel>
+  [userPersonKey]: Partial<UserModel>
+}
+
+export function getUserKeyByType(type: UserType) {
+  switch (type) {
+    case UserType.PERSON:
+      return userPersonKey
+    case UserType.COMPANY:
+      return userCompanyKey
+  }
 }
 
 export interface UserModel {
   verificationId?: string
   formUrl?: string
   verification: Partial<Verification>
-  data?: Partial<ApplicantModel>
+  applicant?: Partial<ApplicantModel>
 }
 
 export interface ApplicantModel {
