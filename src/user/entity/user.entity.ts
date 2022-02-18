@@ -20,6 +20,23 @@ export interface UserModel {
   verificationId?: string
   formUrl?: string
   verification: Partial<Verification>
+  data?: Partial<ApplicantModel>
+}
+
+export interface ApplicantModel {
+  first_name?: string
+  middle_name?: string
+  last_name?: string
+  residence_country?: string
+  documents?: ApplicantDocuments
+  companyName?: string
+  registration_country?: string
+  business_activity?: object
+}
+
+export interface ApplicantDocuments {
+  front_side?: string
+  back_side?: string
 }
 
 export enum UserType {

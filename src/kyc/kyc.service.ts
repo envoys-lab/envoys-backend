@@ -30,11 +30,7 @@ export class KYCService {
       isUserVefified = false
     }
 
-    if (
-      !userStatus ||
-      (userStatus != VerificationStatus.UNUSED && !user[userTypeKey].formUrl) ||
-      (userStatus == VerificationStatus.COMPLETED && !isUserVefified)
-    ) {
+    if (!userStatus || !user[userTypeKey].formUrl || (userStatus == VerificationStatus.COMPLETED && !isUserVefified)) {
       return this.requestFormUrl(user, userType, redirectUrl)
     }
 
@@ -92,24 +88,39 @@ export class KYCService {
       throw new BadRequestException('No verification data found. You need to start verification at first.')
     }
 
-    let fetchedData, userTypeKey
+    let userTypeKey, validKeys
     if (user.person.verificationId) {
-      fetchedData = await this.kycAidService.getVerification(user.person.verificationId)
+      validKeys = ['first_name', 'middle_name', 'last_name', 'residence_country', 'documents']
       userTypeKey = 'person'
     } else if (user.company.verificationId) {
-      fetchedData = await this.kycAidService.getVerification(user.company.verificationId)
+      validKeys = ['companyName', 'registration_country', 'business_activity', 'documents']
       userTypeKey = 'company'
-    } else {
-      throw new BadRequestException('Cannot resolve the user by verification id')
     }
 
-    const { verification_id, ...newDto } = fetchedData
+    const fetchedVerificationData = await this.kycAidService.getVerification(user[userTypeKey].verificationId)
+    const fetchedApplicantData = await this.kycAidService.getApplicant(
+      fetchedVerificationData.applicant_id || user[userTypeKey].verification.applicant_id,
+    )
+
+    const actualUserStatus = fetchedApplicantData.verification_status
+
+    Object.keys(fetchedApplicantData).forEach((key) => validKeys.includes(key) || delete fetchedApplicantData[key])
+    delete fetchedVerificationData.verification_id
+
     await this.userService.updateUser({
       _id: user._id,
       [userTypeKey]: {
         verification: {
           ...user[userTypeKey].verification,
-          ...newDto,
+          ...fetchedVerificationData,
+          status: actualUserStatus == 'pending' || actualUserStatus == 'processing' ? 'pending' : fetchedVerificationData.status,
+        },
+        data: {
+          ...fetchedApplicantData,
+          documents: {
+            front_side: fetchedApplicantData.documents[0].front_side || null,
+            back_side: fetchedApplicantData.documents[0].back_side || null,
+          },
         },
       },
     })
@@ -117,31 +128,44 @@ export class KYCService {
     const fetchedUser = await this.userService.getUserById(userId)
 
     return {
-      person: { ...fetchedUser.person.verification },
-      company: { ...fetchedUser.company.verification },
+      person: { verification: { ...fetchedUser.person.verification }, data: { ...fetchedUser.person.data } },
+      company: { verification: { ...fetchedUser.company.verification }, data: { ...fetchedUser.company.data } },
     }
   }
 
   async callbackHandler(dto: Verification) {
     const user: User = await this.userService.getUserByVerificationId(dto.verification_id)
 
-    let userType
+    let userType, validKeys
     if (user.person.verificationId == dto.verification_id) {
       userType = 'person'
+      validKeys = ['first_name', 'middle_name', 'last_name', 'residence_country', 'documents']
     } else if (user.company.verificationId == dto.verification_id) {
       userType = 'company'
+      validKeys = ['companyName', 'registration_country', 'business_activity', 'documents']
     } else {
       throw new BadRequestException('Cannot resolve the user by verification id')
     }
 
-    const { verification_id, ...newDto } = dto
+    const fetchedData = await this.kycAidService.getApplicant(dto.applicant_id)
+
+    Object.keys(fetchedData).forEach((key) => validKeys.includes(key) || delete fetchedData[key])
+    delete dto.verification_id
+
     await this.userService.updateUser({
       ...user,
       [userType]: {
         ...user[userType],
         verification: {
           ...user[userType].verification,
-          ...newDto,
+          ...dto,
+        },
+        data: {
+          ...fetchedData,
+          documents: {
+            front_side: fetchedData.documents[0].front_side || null,
+            back_side: fetchedData.documents[0].back_side || null,
+          },
         },
       },
     })

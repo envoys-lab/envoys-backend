@@ -1,4 +1,5 @@
 import { IsNotEmpty, Validate } from 'class-validator'
+import { ApplicantDocuments } from 'src/user/entity/user.entity'
 import { IsWalletAddress } from 'src/user/validation/IsWalletAddress'
 
 export class CreateFormUrl {
@@ -21,6 +22,18 @@ export interface GetVerificationResponse {
   applicant_id?: string
   verified?: boolean
   verifications?: VerificationItem
+}
+
+export interface GetApplicantResponse {
+  first_name?: string
+  middle_name?: string
+  last_name?: string
+  residence_country?: string
+  documents?: ApplicantDocuments
+  companyName: string
+  registration_country?: string
+  business_activity?: object
+  verification_status: string
 }
 
 export enum VerificationStatus {
