@@ -98,9 +98,17 @@ export class KYCService {
     }
 
     const fetchedVerificationData = await this.kycAidService.getVerification(user[userTypeKey].verificationId)
-    const fetchedApplicantData = await this.kycAidService.getApplicant(
-      fetchedVerificationData.applicant_id || user[userTypeKey].verification.applicant_id,
-    )
+
+    const applicantId = fetchedVerificationData.applicant_id || user[userTypeKey].verification.applicant_id
+
+    let fetchedApplicantData
+    if (applicantId) {
+      fetchedApplicantData = await this.kycAidService.getApplicant(applicantId)
+    } else {
+      fetchedApplicantData = {
+        documents: [{ front_side: null, back_side: null }],
+      }
+    }
 
     const actualUserStatus = fetchedApplicantData.verification_status
 
