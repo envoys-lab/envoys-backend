@@ -17,11 +17,6 @@ export class KYCController {
     return this.kycService.refreshVerification(params.userId)
   }
 
-  @Post(':userId/applicant/:userType')
-  async getApplicant(@Param() params: GetApplicantParams) {
-    return this.kycService.getApplicant(params.userId, params.userType)
-  }
-
   @Post('verification/callback')
   async processVerificationCallback(@Body() dto: Verification) {
     return this.kycService.callbackHandler(dto)

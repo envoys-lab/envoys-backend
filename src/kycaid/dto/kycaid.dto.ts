@@ -33,6 +33,7 @@ export interface GetApplicantResponse {
   companyName: string
   registration_country?: string
   business_activity?: object
+  verification_status: string
 }
 
 export enum VerificationStatus {
