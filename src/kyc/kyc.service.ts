@@ -163,7 +163,7 @@ export class KYCService {
     })
   }
 
-  static getUserKeyByVerificationId(user: User, verificationId: string): 'person' | 'company' {
+  static getUserKeyByVerificationId(user: User, verificationId: string): string {
     if (user[userPersonKey].verificationId == verificationId) {
       return userPersonKey
     }

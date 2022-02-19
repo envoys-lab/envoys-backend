@@ -6,7 +6,7 @@ import { User, userCompanyKey, userPersonKey } from './entity/user.entity'
 import { UserService } from './user.service'
 import { userId, userMock, UserRepositoryMock, userWalletAddress, verificationId } from '../../test/mock/user'
 
-describe('UserController', () => {
+describe('UserService', () => {
   let service: UserService
 
   beforeEach(async () => {
@@ -29,8 +29,8 @@ describe('UserController', () => {
         [userCompanyKey]: {},
         [userPersonKey]: {},
       }
-
       const findOneSpy = jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(user)
+
       const getUserById = await service.getUserById(userId)
 
       expect(findOneSpy).toHaveBeenCalledWith(userId)
@@ -39,31 +39,37 @@ describe('UserController', () => {
 
     it('should throw a NotFoundException', async () => {
       const FakeUserId = 'fake' as ObjectID
+      jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(undefined)
 
-      service.getUserById(FakeUserId).catch((e) => {
-        expect(e).toBeInstanceOf(NotFoundException)
-      })
+      await expect(service.getUserById(FakeUserId)).rejects.toThrow(NotFoundException)
     })
   })
 
   describe('connectUser', () => {
     it('should connect user using wallet address and return that', async () => {
+      jest.spyOn(UserRepositoryMock, 'create').mockResolvedValue(userMock)
+      jest.spyOn(UserRepositoryMock, 'save').mockResolvedValue(userMock)
+
       const connectUser = await service.connectUser(userWalletAddress)
+
       expect(connectUser).toEqual(userMock)
     })
   })
 
   describe('getUserByVerificationId', () => {
     it('should return user using verification id', async () => {
-      const connectUser = await service.connectUser(userWalletAddress)
-      expect(connectUser).toEqual(userMock)
+      jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(userMock)
+
+      const user = await service.getUserByVerificationId(verificationId)
+
+      expect(user).toEqual(userMock)
     })
 
     it('should throw a NotFoundException', async () => {
       const fakeVerificationId = 'fake'
-      service.getUserByVerificationId(fakeVerificationId).catch((e) => {
-        expect(e).toBeInstanceOf(NotFoundException)
-      })
+      jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(undefined)
+
+      await expect(service.getUserByVerificationId(fakeVerificationId)).rejects.toThrow(NotFoundException)
     })
   })
 
@@ -73,8 +79,9 @@ describe('UserController', () => {
         _id: userId,
         ...userMock,
       }
-
+      jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(userMock)
       const saveSpy = jest.spyOn(UserRepositoryMock, 'save').mockResolvedValue(userDto)
+
       const updateUser = await service.updateUser(userDto)
 
       expect(saveSpy).toHaveBeenCalledWith(userDto)
@@ -86,8 +93,9 @@ describe('UserController', () => {
         ...userMock,
         userWalletAddress: userWalletAddress,
       }
-
+      jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(userMock)
       const saveSpy = jest.spyOn(UserRepositoryMock, 'save').mockResolvedValue(userDto)
+
       const updateUser = await service.updateUser(userDto)
 
       expect(saveSpy).toHaveBeenCalledWith(userDto)
@@ -101,8 +109,9 @@ describe('UserController', () => {
           verificationId: verificationId,
         },
       }
-
+      jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(userMock)
       const saveSpy = jest.spyOn(UserRepositoryMock, 'save').mockResolvedValue(userDto)
+
       const updateUser = await service.updateUser(userDto)
 
       expect(saveSpy).toHaveBeenCalledWith(userDto)
@@ -115,10 +124,9 @@ describe('UserController', () => {
         [userCompanyKey]: {},
         [userPersonKey]: {},
       }
+      jest.spyOn(UserRepositoryMock, 'findOne').mockResolvedValue(undefined)
 
-      service.updateUser(userDtoToFail).catch((e) => {
-        expect(e).toBeInstanceOf(NotFoundException)
-      })
+      await expect(service.updateUser(userDtoToFail)).rejects.toThrow(NotFoundException)
     })
   })
 })

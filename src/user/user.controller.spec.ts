@@ -20,17 +20,17 @@ describe('UserController', () => {
   })
 
   describe('/GET :id', () => {
-    it('should find and return user record', () => {
+    it('should find and return user record', async () => {
       const params = { id: userId }
       const getUserByIdDto = {
         ...userMock,
         _id: userId,
       }
-
       jest.spyOn(UserServiceMock, 'getUserById').mockResolvedValue(getUserByIdDto)
-      const getUserById = controller.getUserById(params)
 
-      expect(getUserById).resolves.toEqual(userMock)
+      const getUserById = await controller.getUserById(params)
+
+      expect(getUserById).toEqual(userMock)
       expect(UserServiceMock.getUserById).toHaveBeenCalledWith(params.id)
     })
   })
@@ -42,8 +42,8 @@ describe('UserController', () => {
         ...userMock,
         userWalletAddress: userWalletAddress,
       }
-
       jest.spyOn(UserServiceMock, 'connectUser').mockResolvedValue(connectUserDto)
+
       const connectUser = await controller.connectUser(params)
 
       expect(connectUser).toEqual(userMock)

@@ -39,10 +39,11 @@ describe('KYCAidService', () => {
           ...createFormUrlResponse,
         },
       }
-
       jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(response))
 
-      expect(await service.createFormUrl(formId, dto)).toEqual(createFormUrlResponse)
+      const result = await service.createFormUrl(formId, dto)
+
+      expect(result).toEqual(createFormUrlResponse)
     })
   })
 
@@ -54,10 +55,11 @@ describe('KYCAidService', () => {
           ...getApplicantResponse,
         },
       }
-
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(response))
 
-      expect(await service.getVerification(verificationId)).toEqual(getApplicantResponse)
+      const result = await service.getVerification(verificationId)
+
+      expect(result).toEqual(getApplicantResponse)
     })
   })
 
@@ -69,10 +71,11 @@ describe('KYCAidService', () => {
           ...getVerificationResponse,
         },
       }
-
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(response))
 
-      expect(await service.getVerification(verificationId)).toEqual(getVerificationResponse)
+      const result = await service.getVerification(verificationId)
+
+      expect(result).toEqual(getVerificationResponse)
     })
   })
 })

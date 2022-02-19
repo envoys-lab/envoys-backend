@@ -37,8 +37,8 @@ describe('KYCController', () => {
       const body = {
         redirectUrl: 'http://localhost',
       }
-
       jest.spyOn(KYCServiceMock, 'createFormUrl').mockResolvedValue(createFormUrlResponse)
+
       const createFormUrl = await controller.createFormUrl(params, body)
 
       expect(createFormUrl).toEqual(getFormUrlDto)
@@ -49,6 +49,7 @@ describe('KYCController', () => {
   describe('/POST :userId/verification/refresh', () => {
     it('should update verification and return that', async () => {
       jest.spyOn(KYCServiceMock, 'refreshVerification').mockResolvedValue(refreshVerificationResponse)
+
       const refreshVerification = await controller.refreshVerification(userId)
 
       expect(refreshVerification).toEqual(verificationDto)
@@ -59,6 +60,7 @@ describe('KYCController', () => {
   describe('/POST verification/callback', () => {
     it('should process callback', async () => {
       jest.spyOn(KYCServiceMock, 'callbackHandler').mockResolvedValue(callbackDto)
+
       const processVerificationCallback = await controller.processVerificationCallback(callbackDto)
 
       expect(processVerificationCallback).toEqual(callbackDto)
