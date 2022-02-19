@@ -11,6 +11,7 @@ import { KYCAidService } from '../kycaid/kycaid.service'
 import { ApplicantModel, getUserKeyByType, User, userCompanyKey, userPersonKey, UserType } from '../user/entity/user.entity'
 import { UserService } from '../user/user.service'
 import { ObjectID } from 'typeorm'
+import { FormUrlResponse } from './dto/kyc.controller.dto'
 
 @Injectable()
 export class KYCService {
@@ -22,14 +23,14 @@ export class KYCService {
     this.companyFormId = this.configService.get<string>('kyc.companyFormId')
   }
 
-  async createFormUrl(userId: ObjectID, userType: UserType, redirectUrl?: string) {
+  async createFormUrl(userId: ObjectID, userType: UserType, redirectUrl?: string): Promise<FormUrlResponse> {
     const user: User = await this.userService.getUserById(userId)
 
     const userData = user[getUserKeyByType(userType)]
     const userStatus = userData.verification ? userData.verification.status : null
     const isUserVerified = userData.verification ? userData.verification.verified : false
 
-    if (userStatus == VerificationStatus.PENDING) {
+    if (userStatus == VerificationStatus.PENDING && userData.formUrl) {
       throw new BadRequestException(`The KYC [${userType}] verification for ${userId} is pending`)
     }
 
@@ -44,7 +45,7 @@ export class KYCService {
     return this.requestFormUrl(user, userType, redirectUrl)
   }
 
-  private async requestFormUrl(user: User, userType: UserType, redirectUrl: string) {
+  private async requestFormUrl(user: User, userType: UserType, redirectUrl: string): Promise<FormUrlResponse> {
     const formId = this.getFormIdByUserType(userType)
     const body: CreateFormUrl = {
       external_applicant_id: user._id.toString(),
@@ -57,7 +58,7 @@ export class KYCService {
     return { formUrl: fetchedData.form_url }
   }
 
-  private async updateUserData(user: User, userType: UserType, data: CreateFormUrlResponse) {
+  private async updateUserData(user: User, userType: UserType, data: CreateFormUrlResponse): Promise<void> {
     const userKey = getUserKeyByType(userType)
 
     await this.userService.updateUser({
@@ -83,10 +84,10 @@ export class KYCService {
     }
   }
 
-  async refreshVerification(userId: ObjectID) {
+  async refreshVerification(userId: ObjectID): Promise<User> {
     const user: User = await this.userService.getUserById(userId)
 
-    if (!user.person.verificationId && !user.company.verificationId) {
+    if (!user[userCompanyKey].verificationId && !user[userPersonKey].verificationId) {
       throw new BadRequestException('No verification data found. You need to start verification at first.')
     }
 
@@ -97,7 +98,7 @@ export class KYCService {
     return this.userService.getUserById(userId)
   }
 
-  private async refreshVerificationByType(user: User, userType: UserType) {
+  private async refreshVerificationByType(user: User, userType: UserType): Promise<void> {
     const userKey = getUserKeyByType(userType)
     const userData = user[userKey]
 
@@ -117,13 +118,14 @@ export class KYCService {
       fetchedApplicantData = await this.kycAidService.getApplicant(applicantId)
     }
 
-    const actualUserStatus: string = fetchedApplicantData.verification_status || ''
+    const actualUserStatus: string = fetchedApplicantData.verification_status ?? ''
     const verificationStatus =
       actualUserStatus == 'pending' || actualUserStatus == 'processing' ? 'pending' : fetchedVerificationData.status
 
     await this.userService.updateUser({
       _id: user._id,
       [userKey]: {
+        ...user[userKey],
         verification: {
           ...user[userKey].verification,
           ...fetchedVerificationData,
@@ -137,7 +139,7 @@ export class KYCService {
     })
   }
 
-  async callbackHandler(dto: Verification) {
+  async callbackHandler(dto: Verification): Promise<void> {
     const user: User = await this.userService.getUserByVerificationId(dto.verification_id)
     const userKey = KYCService.getUserKeyByVerificationId(user, dto.verification_id)
 
@@ -161,7 +163,7 @@ export class KYCService {
     })
   }
 
-  static getUserKeyByVerificationId(user: User, verificationId: string) {
+  static getUserKeyByVerificationId(user: User, verificationId: string): 'person' | 'company' {
     if (user[userPersonKey].verificationId == verificationId) {
       return userPersonKey
     }

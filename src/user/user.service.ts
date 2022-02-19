@@ -34,7 +34,7 @@ export class UserService {
     return fetchedUser
   }
 
-  async getUserByVerificationId(verificationId: string) {
+  async getUserByVerificationId(verificationId: string): Promise<User> {
     for (const userType in UserType) {
       const result = await this.getUserByVerificationIdAndType(verificationId, UserType[userType])
       if (result) {
@@ -45,7 +45,7 @@ export class UserService {
     throw new NotFoundException(`Unable to find the user by verification id: ${verificationId}`)
   }
 
-  private async getUserByVerificationIdAndType(verificationId: string, userType: UserType) {
+  private async getUserByVerificationIdAndType(verificationId: string, userType: UserType): Promise<User> {
     const userKey = getUserKeyByType(userType)
     return this.userRepository.findOne({
       where: { [`${userKey}.verificationId`]: verificationId },
@@ -62,7 +62,7 @@ export class UserService {
     return this.userRepository.save(newUser)
   }
 
-  async updateUser(dto: Partial<User>) {
+  async updateUser(dto: Partial<User>): Promise<User> {
     let fetchedUser
 
     if (dto._id) {

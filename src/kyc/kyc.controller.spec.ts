@@ -1,34 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { applicantId, userId, verificationId } from '../../test/mock/user'
+import { userId } from '../../test/mock/user'
 import { UserType } from '../user/entity/user.entity'
 import { KYCController } from './kyc.controller'
 import { KYCService } from './kyc.service'
-import { VerificationStatus } from '../kycaid/dto/kycaid.dto'
-import { callbackDto, getFormUrlDto, verificationDto } from '../../test/mock/kyc'
+import {
+  callbackDto,
+  createFormUrlResponse,
+  getFormUrlDto,
+  KYCServiceMock,
+  refreshVerificationResponse,
+  verificationDto,
+} from '../../test/mock/kyc'
 
 describe('KYCController', () => {
   let controller: KYCController
 
-  const mockKYCService = {
-    createFormUrl: jest.fn(() => Promise.resolve({ formUrl: 'formUrl' })),
-    refreshVerification: jest.fn(() =>
-      Promise.resolve({
-        id: userId,
-        verification: {
-          applicant_id: applicantId,
-          status: VerificationStatus.UNUSED,
-          verified: false,
-          verifications: {},
-        },
-      }),
-    ),
-    callbackHandler: jest.fn((dto) => Promise.resolve({ ...dto })),
-  }
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [KYCController],
-      providers: [{ provide: KYCService, useValue: mockKYCService }],
+      providers: [{ provide: KYCService, useValue: KYCServiceMock }],
     }).compile()
 
     controller = module.get<KYCController>(KYCController)
@@ -48,32 +38,31 @@ describe('KYCController', () => {
         redirectUrl: 'http://localhost',
       }
 
-      expect(await controller.createFormUrl(params, body)).toEqual(getFormUrlDto)
-      expect(mockKYCService.createFormUrl).toHaveBeenCalled()
+      jest.spyOn(KYCServiceMock, 'createFormUrl').mockResolvedValue(createFormUrlResponse)
+      const createFormUrl = await controller.createFormUrl(params, body)
+
+      expect(createFormUrl).toEqual(getFormUrlDto)
+      expect(KYCServiceMock.createFormUrl).toHaveBeenCalled()
     })
   })
 
   describe('/POST :userId/verification/refresh', () => {
     it('should update verification and return that', async () => {
-      expect(await controller.refreshVerification(userId)).toEqual(verificationDto)
-      expect(mockKYCService.refreshVerification).toHaveBeenCalled()
+      jest.spyOn(KYCServiceMock, 'refreshVerification').mockResolvedValue(refreshVerificationResponse)
+      const refreshVerification = await controller.refreshVerification(userId)
+
+      expect(refreshVerification).toEqual(verificationDto)
+      expect(KYCServiceMock.refreshVerification).toHaveBeenCalled()
     })
   })
 
   describe('/POST verification/callback', () => {
     it('should process callback', async () => {
-      const dto = {
-        verification_id: verificationId,
-        status: VerificationStatus.COMPLETED,
-        applicant_id: applicantId,
-        verified: true,
-        verifications: {},
-        request_id: '',
-        type: 'CHECKING_COMPLETED',
-      }
+      jest.spyOn(KYCServiceMock, 'callbackHandler').mockResolvedValue(callbackDto)
+      const processVerificationCallback = await controller.processVerificationCallback(callbackDto)
 
-      expect(await controller.processVerificationCallback(dto)).toEqual(callbackDto)
-      expect(mockKYCService.callbackHandler).toHaveBeenCalled()
+      expect(processVerificationCallback).toEqual(callbackDto)
+      expect(KYCServiceMock.callbackHandler).toHaveBeenCalled()
     })
   })
 })

@@ -1,13 +1,11 @@
 import { HttpModule, HttpService } from '@nestjs/axios'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AxiosResponse } from 'axios'
-import { VerificationStatus } from './dto/kycaid.dto'
 import { of } from 'rxjs'
 import {
   axiosResponseModel,
   createFormUrlResponse,
   formId,
-  formUrl,
   getApplicantResponse,
   getVerificationResponse,
 } from '../../test/mock/kycaid'
@@ -38,9 +36,7 @@ describe('KYCAidService', () => {
       const response: AxiosResponse<any> = {
         ...axiosResponseModel,
         data: {
-          form_id: formId,
-          form_url: formUrl,
-          verification_id: verificationId,
+          ...createFormUrlResponse,
         },
       }
 
@@ -55,9 +51,7 @@ describe('KYCAidService', () => {
       const response: AxiosResponse<any> = {
         ...axiosResponseModel,
         data: {
-          first_name: 'Joe',
-          last_name: 'Doe',
-          residence_country: 'UA',
+          ...getApplicantResponse,
         },
       }
 
@@ -70,14 +64,10 @@ describe('KYCAidService', () => {
   describe('getVerification', () => {
     it('should update verification and return that', async () => {
       const response: AxiosResponse<any> = {
+        ...axiosResponseModel,
         data: {
-          verification_id: verificationId,
-          status: VerificationStatus.UNUSED,
+          ...getVerificationResponse,
         },
-        headers: {},
-        config: { url: 'http://localhost:8080/users' },
-        status: 200,
-        statusText: 'OK',
       }
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(response))

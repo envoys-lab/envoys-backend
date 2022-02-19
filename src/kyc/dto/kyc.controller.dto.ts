@@ -20,3 +20,7 @@ export class RefreshVerificationParams {
   @IsMongoId()
   userId: ObjectID
 }
+
+export interface FormUrlResponse {
+  formUrl: string
+}
