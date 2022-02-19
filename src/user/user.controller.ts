@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post } from '@nestjs/common'
 import { UserService } from './user.service'
-import User from './entity/user.entity'
+import { User } from './entity/user.entity'
 import { ConnectUserParams, GetUserByIdParams } from './dto/user.controller.dto'
 
 @Controller('users')

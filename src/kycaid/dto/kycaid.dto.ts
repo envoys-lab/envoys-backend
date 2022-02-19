@@ -1,12 +1,7 @@
-import { IsNotEmpty, Validate } from 'class-validator'
-import { ApplicantDocuments } from 'src/user/entity/user.entity'
-import { IsWalletAddress } from 'src/user/validation/IsWalletAddress'
+import { ApplicantModel } from '../../user/entity/user.entity'
 
 export class CreateFormUrl {
-  @Validate(IsWalletAddress)
-  @IsNotEmpty()
   external_applicant_id: string
-
   redirect_url?: string
 }
 
@@ -22,6 +17,7 @@ export interface GetVerificationResponse {
   applicant_id?: string
   verified?: boolean
   verifications?: VerificationItem
+  applicant?: ApplicantModel
 }
 
 export interface GetApplicantResponse {
@@ -29,11 +25,16 @@ export interface GetApplicantResponse {
   middle_name?: string
   last_name?: string
   residence_country?: string
-  documents?: ApplicantDocuments
-  companyName: string
+  documents?: ApplicantDocuments[]
+  companyName?: string
   registration_country?: string
   business_activity?: object
-  verification_status: string
+  verification_status?: string
+}
+
+export interface ApplicantDocuments {
+  front_side?: string
+  back_side?: string
 }
 
 export enum VerificationStatus {

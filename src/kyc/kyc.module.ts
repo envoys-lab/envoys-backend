@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { KYCAidModule } from 'src/kycaid/kycaid.module'
+import { KYCAidModule } from '../kycaid/kycaid.module'
 import { KYCController } from './kyc.controller'
 import { KYCService } from './kyc.service'
 import { UserModule } from '../user/user.module'

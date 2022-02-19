@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ObjectID, Repository } from 'typeorm'
-import User from './entity/user.entity'
+import { getUserKeyByType, User, UserType } from './entity/user.entity'
 
 @Injectable()
 export class UserService {
@@ -34,24 +34,22 @@ export class UserService {
     return fetchedUser
   }
 
-  async getUserByVerificationId(verificationId: string) {
-    const fetchedUserPersonVerificationId = await this.userRepository.findOne({
-      where: { 'company.verificationId': verificationId },
-    })
-
-    if (fetchedUserPersonVerificationId) {
-      return fetchedUserPersonVerificationId
-    }
-
-    const fetchedUserCompanyVerificationId = await this.userRepository.findOne({
-      where: { 'person.verificationId': verificationId },
-    })
-
-    if (fetchedUserCompanyVerificationId) {
-      return fetchedUserCompanyVerificationId
+  async getUserByVerificationId(verificationId: string): Promise<User> {
+    for (const userType in UserType) {
+      const result = await this.getUserByVerificationIdAndType(verificationId, UserType[userType])
+      if (result) {
+        return result
+      }
     }
 
     throw new NotFoundException(`Unable to find the user by verification id: ${verificationId}`)
+  }
+
+  private async getUserByVerificationIdAndType(verificationId: string, userType: UserType): Promise<User> {
+    const userKey = getUserKeyByType(userType)
+    return this.userRepository.findOne({
+      where: { [`${userKey}.verificationId`]: verificationId },
+    })
   }
 
   private async createUser(userWalletAddress: string): Promise<User> {
@@ -64,7 +62,7 @@ export class UserService {
     return this.userRepository.save(newUser)
   }
 
-  async updateUser(dto: Partial<User>) {
+  async updateUser(dto: Partial<User>): Promise<User> {
     let fetchedUser
 
     if (dto._id) {
@@ -72,21 +70,18 @@ export class UserService {
     } else if (dto.userWalletAddress) {
       fetchedUser = await this.getUserByWalletAddress(dto.userWalletAddress)
     } else if (dto.person.verificationId != null) {
-      fetchedUser = await this.getUserByVerificationId(dto.person.verificationId)
+      fetchedUser = await this.getUserByVerificationIdAndType(dto.person.verificationId, UserType.PERSON)
     } else if (dto.company.verificationId != null) {
-      fetchedUser = await this.getUserByVerificationId(dto.company.verificationId)
+      fetchedUser = await this.getUserByVerificationIdAndType(dto.company.verificationId, UserType.COMPANY)
+    }
+
+    if (!fetchedUser) {
+      throw new NotFoundException(`Cannot find user for object: ${dto}`)
     }
 
     fetchedUser = {
       ...fetchedUser,
-      person: {
-        ...fetchedUser.person,
-        ...dto.person,
-      },
-      company: {
-        ...fetchedUser.company,
-        ...dto.company,
-      },
+      ...dto,
     }
 
     return this.userRepository.save(fetchedUser)
