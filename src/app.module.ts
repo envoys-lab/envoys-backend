@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module'
 import configuration from './config'
 import { KYCModule } from './kyc/kyc.module'
 import { DatabaseModule } from './database.module'
+import { CompanyModule } from './company/company.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DatabaseModule } from './database.module'
     DatabaseModule,
     UserModule,
     KYCModule,
+    CompanyModule,
   ],
 })
 export class AppModule {}
