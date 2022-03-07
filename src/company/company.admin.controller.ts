@@ -6,23 +6,23 @@ import {
   ChangeCompanyVisibilityParams,
   DeleteCompanyParams,
   DeleteCompanyResponse,
-  GetCompaniesListQuery,
-  GetCompaniesListResponse,
+  GetCompaniesQuery,
+  GetCompaniesResponse,
   GetCompanyByIdParams,
   UpdateCompanyParams,
   UpdateCompanyRequest,
 } from './dto/company.controller.dto'
 import { Company } from './entity/company.entity'
-import { CompanyTokenInterceptor } from './interceptor/company.token.interceptor'
+import { AdminCompanyTokenInterceptor } from './interceptor/company.admin.token.interceptor'
 
 @Controller('admin/companies')
-@UseInterceptors(CompanyTokenInterceptor)
+@UseInterceptors(AdminCompanyTokenInterceptor)
 export class CompanyAdminController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Get()
-  async getCompaniesList(@Query() query: GetCompaniesListQuery): Promise<GetCompaniesListResponse> {
-    return this.companyService.getCompaniesList(query)
+  async getCompanies(@Query() query: GetCompaniesQuery): Promise<GetCompaniesResponse> {
+    return this.companyService.getCompanies(query.page, query.search)
   }
 
   @Get(':companyId')
@@ -35,12 +35,12 @@ export class CompanyAdminController {
     return this.companyService.addCompany(dto)
   }
 
-  @Put(':companyId/visibility')
-  async changeCompanyVisibility(
+  @Put(':companyId/active')
+  async changeCompanyActive(
     @Param() params: ChangeCompanyVisibilityParams,
     @Body() dto: ChangeCompanyVisibilityDto,
   ): Promise<Company> {
-    return this.companyService.changeCompanyVisibility(params.companyId, dto)
+    return this.companyService.changeCompanyActive(params.companyId, dto)
   }
 
   @Patch(':companyId')

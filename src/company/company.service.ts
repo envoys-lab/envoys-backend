@@ -1,45 +1,79 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ObjectID, Repository } from 'typeorm'
 import {
   AddCompanyRequest,
   ChangeCompanyVisibilityDto,
   DeleteCompanyResponse,
-  GetCompaniesListQuery,
-  GetCompaniesListResponse,
+  GetCompaniesResponse,
   UpdateCompanyRequest,
 } from './dto/company.controller.dto'
-import { Company } from './entity/company.entity'
+import { Company, StageStatus } from './entity/company.entity'
 
 @Injectable()
 export class CompanyService {
-  constructor(@InjectRepository(Company) private companyRepository: Repository<Company>) {}
+  private readonly tagsForSearch = ['sellType', 'name', 'homePageUrl', 'status']
+  private readonly searchTake: number
 
-  async getCompaniesList(query: GetCompaniesListQuery): Promise<GetCompaniesListResponse> {
-    const skip = query.skip || 0
-    const search = query.search || ''
-
-    const data = await this.companyRepository.findAndCount({
-      where: { name: { $regex: `^${search}` } },
-      skip: skip,
-      take: 5,
-    })
-
-    return this.paginateResponse(data, 0)
+  constructor(@InjectRepository(Company) private companyRepository: Repository<Company>, private configService: ConfigService) {
+    this.searchTake = this.configService.get<number>('app.searchTake')
   }
 
-  private paginateResponse(data, skip): GetCompaniesListResponse {
+  async getCompanies(page: number, search: string): Promise<GetCompaniesResponse> {
+    if (search) {
+      let response: GetCompaniesResponse
+
+      for (const tag of this.tagsForSearch) {
+        const data = await this.findCopamiesByCategory(page, tag, search)
+
+        response = {
+          ...response,
+          ...data,
+        }
+      }
+
+      return response
+    }
+
+    return this.findCopamiesByCategory(page, 'general')
+  }
+
+  private async findCopamiesByCategory(page: number, tag: string, search?: string): Promise<GetCompaniesResponse> {
+    const keyword = search ? search : ''
+    const currentPage = page ? page : 1
+    const skip = (currentPage - 1) * this.searchTake
+
+    let whereQuery = {}
+
+    if (tag && keyword) {
+      whereQuery = { [tag]: { $regex: `^${keyword}` } }
+    } else if (tag == 'sellType') {
+      whereQuery = { [tag]: { $gt: `^${keyword}` } }
+    }
+
+    const data = await this.companyRepository.findAndCount({
+      where: { ...whereQuery },
+      skip: skip,
+      take: this.searchTake,
+    })
+
+    return this.paginateResponse(data, currentPage, tag)
+  }
+
+  private paginateResponse(data, page: number, tag: string): GetCompaniesResponse {
     const [result, total] = data
-    const loaded = result.length
-    const left = total - (skip + loaded)
-    const nextSkipValue = left ? left + total : 0
+    const size = result.length
 
     return {
-      data: [...result],
-      total: total,
-      loaded: loaded,
-      left: left,
-      nextSkipValue: nextSkipValue,
+      [tag]: {
+        items: result,
+        meta: {
+          page: page,
+          size: size,
+          total: total,
+        },
+      },
     }
   }
 
@@ -57,14 +91,15 @@ export class CompanyService {
     const company: Company = await this.companyRepository.findOne({ where: { name: dto.name } })
 
     if (company) {
-      return company
+      throw new BadRequestException(`Company with name: ${dto.name} already exist!`)
     }
 
     const newCompany = this.companyRepository.create({ ...dto })
-    return this.companyRepository.save(newCompany)
+
+    return this.updateCompanyDB(newCompany, dto)
   }
 
-  async changeCompanyVisibility(companyId: ObjectID, dto: ChangeCompanyVisibilityDto): Promise<Company> {
+  async changeCompanyActive(companyId: ObjectID, dto: ChangeCompanyVisibilityDto): Promise<Company> {
     const company: Company = await this.companyRepository.findOne(companyId)
 
     if (!company) {
@@ -86,12 +121,30 @@ export class CompanyService {
       throw new NotFoundException(`Unable to find company by id: ${companyId}`)
     }
 
+    return this.updateCompanyDB(company, dto)
+  }
+
+  private updateCompanyDB(company: Company, dto: Partial<Company>): Promise<Company> {
+    if (dto.stages) {
+      company.status = this.getCompanyStatus(dto)
+    }
+
     const updatedCompany = {
       ...company,
       ...dto,
     }
 
     return this.companyRepository.save(updatedCompany)
+  }
+
+  private getCompanyStatus(dto: Partial<Company>): StageStatus {
+    const stages = dto.stages
+
+    if (stages && stages.length === 1) {
+      return stages[0].status
+    } else if (stages.length > 1 && stages[0].status == StageStatus.UPCOMING) {
+      return stages[1].status
+    }
   }
 
   async deleteCompany(companyId: ObjectID): Promise<DeleteCompanyResponse> {

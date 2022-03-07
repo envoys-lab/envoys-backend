@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsDefined,
   IsEnum,
+  IsInt,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
@@ -21,22 +22,33 @@ export class UrlField {
   url: string
 }
 
-export class GetCompaniesListQuery {
+export class GetCompaniesQuery {
   @IsOptional()
-  @IsNumber()
-  skip?: number
+  @IsInt()
+  page?: number
 
   @IsOptional()
   @IsString()
   search?: string
 }
 
-export interface GetCompaniesListResponse {
-  data: Company[]
+export interface GetCompaniesResponse {
+  general?: SearchModel
+  sellType?: SearchModel
+  name?: SearchModel
+  homePageUrl?: SearchModel
+  status?: SearchModel
+}
+
+export interface SearchModel {
+  items: Company[]
+  meta: SearchMeta
+}
+
+export interface SearchMeta {
+  page: number
+  size: number
   total: number
-  left: number
-  loaded: number
-  nextSkipValue: number
 }
 
 export class DocumentModel extends UrlField {
@@ -51,18 +63,93 @@ export class AboutModel {
   text: string
 }
 
+export class TokenModel {
+  @IsNotEmpty()
+  @IsString()
+  ticker: string
+
+  @IsNotEmpty()
+  @IsString()
+  supply: string
+
+  @IsNotEmpty()
+  @IsArray()
+  @IsString({ each: true })
+  distribution: string[]
+
+  @IsNotEmpty()
+  @IsArray()
+  @IsString({ each: true })
+  currencies: string[]
+
+  @IsNotEmpty()
+  @IsString()
+  minContribution: string
+}
+
+export class CompanyModel {
+  @IsNotEmpty()
+  @IsString()
+  registredName: string
+
+  @IsNotEmpty()
+  @IsString()
+  registredCountry: string
+
+  @IsNotEmpty()
+  @IsString()
+  foundedDate: string
+}
+
+export class WhitelistModel {
+  @IsNotEmpty()
+  @IsString()
+  fromDate: string
+
+  @IsNotEmpty()
+  @IsString()
+  tillDate: string
+
+  @IsNotEmpty()
+  @IsString()
+  categories: string
+}
+
+export class AdditionalCompanyDetails {
+  @IsNotEmpty()
+  @IsString()
+  platform: string
+
+  @ValidateNested()
+  @Type(() => WhitelistModel)
+  whitelist: WhitelistModel
+
+  @IsNotEmpty()
+  @IsString()
+  MVP: string
+}
+
 export class DetailsModel {
-  @IsNotEmpty()
-  @IsString()
-  mainText: string
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => TokenModel)
+  token: TokenModel
 
-  @IsNotEmpty()
-  @IsString()
-  secondaryText: string
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CompanyModel)
+  company: CompanyModel
 
+  @IsOptional()
   @IsNotEmpty()
-  @IsString()
-  additionalText: string
+  @IsArray()
+  @IsString({ each: true })
+  bonus: string[]
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdditionalCompanyDetails)
+  additional: AdditionalCompanyDetails
 }
 
 export class StageModel {
@@ -77,22 +164,27 @@ export class StageModel {
   @IsString()
   endDate: string
 
+  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   progress: number
 
+  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   goal: number
 
+  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   raisedFunds: number
 
+  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   cap: number
 
+  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   hardcap: number
@@ -100,6 +192,7 @@ export class StageModel {
   @IsEnum(StageStatus)
   status: StageStatus
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   price: string
@@ -132,7 +225,7 @@ export class SocialStatisModel extends UrlField {
   type: string
 
   @IsNotEmpty()
-  @IsString()
+  @IsUrl()
   url: string
 }
 
@@ -156,8 +249,9 @@ export class MemberModel {
   @IsString()
   position: string
 
+  @IsOptional()
   @IsNotEmpty()
-  @IsString()
+  @IsUrl()
   avatarUrl: string
 
   @ValidateNested()
@@ -199,6 +293,10 @@ export class AddCompanyRequest {
   active: boolean
 
   @IsNotEmpty()
+  @IsArray()
+  sellType: string[]
+
+  @IsNotEmpty()
   @IsString()
   name: string
 
@@ -207,28 +305,33 @@ export class AddCompanyRequest {
   description: string
 
   @IsNotEmpty()
-  @IsString()
+  @IsUrl()
   homePageUrl: string
 
+  @IsOptional()
   @IsNotEmpty()
   @IsUrl()
   videoUrl: string
 
+  @IsOptional()
   @IsNotEmpty()
   @IsUrl()
   logoUrl: string
 
+  @IsOptional()
   @IsDefined()
   @ValidateNested()
   @Type(() => SocialModel)
   social: SocialModel
 
+  @IsOptional()
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DocumentModel)
   documents: DocumentModel[]
 
+  @IsOptional()
   @IsDefined()
   @ValidateNested()
   @Type(() => AboutModel)
@@ -251,6 +354,7 @@ export class AddCompanyRequest {
   @Type(() => RoadmapModel)
   roadmap: RoadmapModel[]
 
+  @IsOptional()
   @IsDefined()
   @ValidateNested()
   @Type(() => ActivityModel)
@@ -287,6 +391,15 @@ export class UpdateCompanyRequest {
   active: boolean
 
   @IsOptional()
+  @IsEnum(StageStatus)
+  status: StageStatus
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsArray()
+  sellType: string[]
+
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   name: string
@@ -298,7 +411,7 @@ export class UpdateCompanyRequest {
 
   @IsOptional()
   @IsNotEmpty()
-  @IsString()
+  @IsUrl()
   homePageUrl: string
 
   @IsOptional()

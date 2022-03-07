@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { Observable } from 'rxjs'
 
 @Injectable()
-export class CompanyTokenInterceptor implements NestInterceptor {
+export class AdminCompanyTokenInterceptor implements NestInterceptor {
   private readonly token: string
 
   constructor(private configService: ConfigService) {
@@ -14,7 +14,7 @@ export class CompanyTokenInterceptor implements NestInterceptor {
     const tokenKey: string = context.switchToHttp().getRequest().headers.authorization
 
     if (!this.isTokenValid(tokenKey)) {
-      throw new ForbiddenException('Forbidden resource')
+      throw new ForbiddenException('Forbidden resource: Invalid token')
     }
 
     return next.handle()

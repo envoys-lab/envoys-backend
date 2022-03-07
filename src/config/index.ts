@@ -5,7 +5,8 @@ const server = registerAs('server', () => ({
 }))
 
 const app = registerAs('app', () => ({
-  token: process.env.APP_TOKEN,
+  token: process.env.ADMIN_AUTH_TOKEN,
+  searchTake: parseInt(process.env.SEARCH_ITEMS_TAKE) || 10,
 }))
 
 const http = registerAs('http', () => ({

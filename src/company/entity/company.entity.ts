@@ -9,7 +9,13 @@ export class Company extends BaseEntity {
   active: boolean
 
   @Column()
+  status: StageStatus
+
+  @Column()
   name: string
+
+  @Column()
+  sellType: string[]
 
   @Column()
   description: string
@@ -70,9 +76,36 @@ export interface AboutModel {
 }
 
 export interface DetailsModel {
-  mainText: string
-  secondaryText: string
-  additionalText: string
+  token: TokenModel
+  company: CompanyModel
+  bonus: string[]
+  additional: AdditionalCompanyDetails
+}
+
+export interface TokenModel {
+  ticker: string
+  supply: string
+  distribution: string[]
+  currencies: string[]
+  minContribution: string
+}
+
+export interface CompanyModel {
+  registredName: string
+  registredCountry: string
+  foundedDate: string
+}
+
+export interface AdditionalCompanyDetails {
+  platform: string
+  whitelist: WhitelistModel
+  MVP: string
+}
+
+export interface WhitelistModel {
+  fromDate: string
+  tillDate: string
+  categories: string
 }
 
 export interface StageModel {
