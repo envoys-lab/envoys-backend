@@ -4,7 +4,6 @@ import {
   IsBoolean,
   IsDefined,
   IsEnum,
-  IsInt,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
@@ -24,7 +23,8 @@ export class UrlField {
 
 export class GetCompaniesQuery {
   @IsOptional()
-  @IsInt()
+  @Type(() => Number)
+  @IsNumber()
   page?: number
 
   @IsOptional()
