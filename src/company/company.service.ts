@@ -33,6 +33,10 @@ export class CompanyService {
         }
       }
 
+      if (Object.keys(response).length === 0) {
+        throw new NotFoundException(`There are no items matching query`)
+      }
+
       return response
     }
 
@@ -40,14 +44,14 @@ export class CompanyService {
   }
 
   private async findCopamiesByCategory(page: number, tag: string, search?: string): Promise<GetCompaniesResponse> {
-    const keyword = search ? search : ''
+    const keyword = search ? search.replace(/[^a-zA-Z0-9]/g, '') : ''
     const currentPage = page ? page : 1
     const skip = (currentPage - 1) * this.searchTake
 
     let whereQuery = {}
 
     if (tag && keyword) {
-      whereQuery = { [tag]: { $regex: `^${keyword}` } }
+      whereQuery = { [tag]: { $regex: `^${keyword}`, $options: 'i' } }
     } else if (tag == 'sellType') {
       whereQuery = { [tag]: { $gt: `^${keyword}` } }
     }
@@ -65,7 +69,7 @@ export class CompanyService {
     const [result, total] = data
     const size = result.length
 
-    return {
+    const fetchedData = {
       [tag]: {
         items: result,
         meta: {
@@ -75,6 +79,8 @@ export class CompanyService {
         },
       },
     }
+
+    return result.length === 0 ? null : fetchedData
   }
 
   async getCompanyById(companyId: ObjectID): Promise<Company> {

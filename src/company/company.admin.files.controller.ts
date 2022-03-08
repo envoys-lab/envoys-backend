@@ -1,11 +1,11 @@
 import { Controller, Post, UseInterceptors } from '@nestjs/common'
-import { CompanyFilesService } from './company.admin.files.service'
+import { CompanyAdminFilesService } from './company.admin.files.service'
 import { AdminCompanyTokenInterceptor } from './interceptor/company.admin.token.interceptor'
 
 @Controller('admin/companies')
 @UseInterceptors(AdminCompanyTokenInterceptor)
-export class CompanyFilesController {
-  constructor(private readonly companyFilesService: CompanyFilesService) {}
+export class CompanyAdminFilesController {
+  constructor(private readonly companyFilesService: CompanyAdminFilesService) {}
 
   @Post(':companyId/file')
   async uploadFile() {
