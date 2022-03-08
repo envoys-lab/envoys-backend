@@ -51,9 +51,11 @@ export class CompanyService {
     let whereQuery = {}
 
     if (tag && keyword) {
-      whereQuery = { [tag]: { $regex: `^${keyword}`, $options: 'i' } }
+      whereQuery = { [tag]: { $regex: `^${keyword}`, $options: 'i' }, active: true }
     } else if (tag == 'sellType') {
-      whereQuery = { [tag]: { $gt: `^${keyword}` } }
+      whereQuery = { [tag]: { $gt: `^${keyword}` }, active: true }
+    } else if (tag == 'general') {
+      whereQuery = { active: true }
     }
 
     const data = await this.companyRepository.findAndCount({
