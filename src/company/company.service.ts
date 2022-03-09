@@ -13,7 +13,7 @@ import { Company, StageStatus } from './entity/company.entity'
 
 @Injectable()
 export class CompanyService {
-  private readonly tagsForSearch = ['sellType', 'name', 'homePageUrl', 'status']
+  private readonly keysForSearch = ['sellType', 'name', 'homePageUrl', 'status']
   private readonly searchTake: number
 
   constructor(@InjectRepository(Company) private companyRepository: Repository<Company>, private configService: ConfigService) {
@@ -22,57 +22,62 @@ export class CompanyService {
 
   async getCompanies(page: number, search: string): Promise<GetCompaniesResponse> {
     if (search) {
-      let response: GetCompaniesResponse
-
-      for (const tag of this.tagsForSearch) {
-        const data = await this.findCopamiesByCategory(page, tag, search)
-
-        response = {
-          ...response,
-          ...data,
-        }
-      }
-
-      if (Object.keys(response).length === 0) {
-        throw new NotFoundException(`There are no items matching query`)
-      }
-
-      return response
+      return this.findCompanyesByKeys(page, search)
     }
 
-    return this.findCopamiesByCategory(page, 'general')
+    return this.findCopamiesByOneKey(page, 'general')
   }
 
-  private async findCopamiesByCategory(page: number, tag: string, search?: string): Promise<GetCompaniesResponse> {
+  private async findCompanyesByKeys(page, search): Promise<GetCompaniesResponse> {
+    let response: GetCompaniesResponse
+
+    for (const key of this.keysForSearch) {
+      const data = await this.findCopamiesByOneKey(page, key, search)
+
+      response = {
+        ...response,
+        ...data,
+      }
+    }
+
+    if (Object.keys(response).length === 0) {
+      throw new NotFoundException(`There are no items matching query`)
+    }
+
+    return response
+  }
+
+  private async findCopamiesByOneKey(page: number, key: string, search?: string): Promise<GetCompaniesResponse> {
     const keyword = search ? search.replace(/[^a-zA-Z0-9]/g, '') : ''
     const currentPage = page ? page : 1
     const skip = (currentPage - 1) * this.searchTake
 
-    let whereQuery = {}
-
-    if (tag && keyword) {
-      whereQuery = { [tag]: { $regex: `^${keyword}`, $options: 'i' }, active: true }
-    } else if (tag == 'sellType') {
-      whereQuery = { [tag]: { $gt: `^${keyword}` }, active: true }
-    } else if (tag == 'general') {
-      whereQuery = { active: true }
-    }
-
     const data = await this.companyRepository.findAndCount({
-      where: { ...whereQuery },
+      where: { ...this.getQuery(key, keyword) },
       skip: skip,
       take: this.searchTake,
     })
 
-    return this.paginateResponse(data, currentPage, tag)
+    return this.paginateResponse(data, currentPage, key)
   }
 
-  private paginateResponse(data, page: number, tag: string): GetCompaniesResponse {
+  private getQuery(key: string, keyword: string) {
+    switch (key) {
+      case 'general':
+        return { active: true }
+      case 'sellType':
+        return { [key]: { $gt: `^${keyword}` }, active: true }
+      default:
+        return { [key]: { $regex: `^${keyword}`, $options: 'i' }, active: true }
+    }
+  }
+
+  private paginateResponse(data, page: number, key: string): GetCompaniesResponse {
     const [result, total] = data
     const size = result.length
 
     const fetchedData = {
-      [tag]: {
+      [key]: {
         items: result,
         meta: {
           page: page,
@@ -104,7 +109,7 @@ export class CompanyService {
 
     const newCompany = this.companyRepository.create({ ...dto })
 
-    return this.updateCompanyDB(newCompany, dto)
+    return this.updateCompanyStatus(newCompany, dto)
   }
 
   async changeCompanyActive(companyId: ObjectID, dto: ChangeCompanyVisibilityDto): Promise<Company> {
@@ -129,10 +134,10 @@ export class CompanyService {
       throw new NotFoundException(`Unable to find company by id: ${companyId}`)
     }
 
-    return this.updateCompanyDB(company, dto)
+    return this.updateCompanyStatus(company, dto)
   }
 
-  private updateCompanyDB(company: Company, dto: Partial<Company>): Promise<Company> {
+  private updateCompanyStatus(company: Company, dto: Partial<Company>): Promise<Company> {
     if (dto.stages) {
       company.status = this.getCompanyStatus(dto)
     }
@@ -148,11 +153,11 @@ export class CompanyService {
   private getCompanyStatus(dto: Partial<Company>): StageStatus {
     const stages = dto.stages
 
-    if (stages && stages.length === 1) {
-      return stages[0].status
-    } else if (stages.length > 1 && stages[0].status == StageStatus.UPCOMING) {
+    if (stages.length > 1 && stages[0].status == StageStatus.UPCOMING) {
       return stages[1].status
     }
+
+    return stages[0].status
   }
 
   async deleteCompany(companyId: ObjectID): Promise<DeleteCompanyResponse> {

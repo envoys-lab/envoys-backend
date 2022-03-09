@@ -294,6 +294,7 @@ export class AddCompanyRequest {
 
   @IsNotEmpty()
   @IsArray()
+  @IsString({ each: true })
   sellType: string[]
 
   @IsNotEmpty()
@@ -395,8 +396,8 @@ export class UpdateCompanyRequest {
   status: StageStatus
 
   @IsOptional()
-  @IsNotEmpty()
   @IsArray()
+  @IsString({ each: true })
   sellType: string[]
 
   @IsOptional()
