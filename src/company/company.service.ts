@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ObjectID, Repository } from 'typeorm'
 import {
@@ -14,11 +13,9 @@ import { Company, StageStatus } from './entity/company.entity'
 @Injectable()
 export class CompanyService {
   private readonly keysForSearch = ['sellType', 'name', 'homePageUrl', 'status']
-  private readonly searchTake: number
+  private readonly searchTake: number = 10
 
-  constructor(@InjectRepository(Company) private companyRepository: Repository<Company>, private configService: ConfigService) {
-    this.searchTake = this.configService.get<number>('app.searchTake')
-  }
+  constructor(@InjectRepository(Company) private companyRepository: Repository<Company>) {}
 
   async getCompanies(page: number, search: string): Promise<GetCompaniesResponse> {
     if (search) {
