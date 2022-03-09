@@ -9,6 +9,7 @@ services:
       KYC_TOKEN: <!!!>
       KYC_FORM_ID_PERSON: <!!!>
       KYC_FORM_ID_COMPANY: <!!!>
+      ADMIN_AUTH_TOKEN: 239231db00638243fa0b1d03488842ea1c06
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     depends_on:

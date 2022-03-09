@@ -4,6 +4,10 @@ const server = registerAs('server', () => ({
   port: parseInt(process.env.SERVER_PORT) || 8080,
 }))
 
+const app = registerAs('app', () => ({
+  token: process.env.ADMIN_AUTH_TOKEN,
+}))
+
 const http = registerAs('http', () => ({
   timeout: parseInt(process.env.HTTP_TIMEOUT) || 5000,
 }))
@@ -18,4 +22,4 @@ const kyc = registerAs('kyc', () => ({
   companyFormId: process.env.KYC_FORM_ID_COMPANY,
 }))
 
-export default [server, http, database, kyc]
+export default [server, http, database, kyc, app]
