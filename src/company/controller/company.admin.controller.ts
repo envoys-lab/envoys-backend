@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseInterceptors } from '@nestjs/common'
-import { CompanyService } from './company.service'
+import { Pagination } from 'nestjs-typeorm-paginate'
+import { CompanyService } from '../company.service'
 import {
   AddCompanyRequest,
   ChangeCompanyVisibilityDto,
@@ -7,13 +8,12 @@ import {
   DeleteCompanyParams,
   DeleteCompanyResponse,
   GetCompaniesQuery,
-  GetCompaniesResponse,
   GetCompanyByIdParams,
   UpdateCompanyParams,
   UpdateCompanyRequest,
-} from './dto/company.controller.dto'
-import { Company } from './entity/company.entity'
-import { AdminCompanyTokenInterceptor } from './interceptor/company.admin.token.interceptor'
+} from '../dto/company.controller.dto'
+import { Company } from '../entity/company.entity'
+import { AdminCompanyTokenInterceptor } from '../interceptor/company.admin.token.interceptor'
 
 @Controller('admin/companies')
 @UseInterceptors(AdminCompanyTokenInterceptor)
@@ -21,8 +21,8 @@ export class CompanyAdminController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Get()
-  async getCompanies(@Query() query: GetCompaniesQuery): Promise<GetCompaniesResponse> {
-    return this.companyService.getCompanies(query.page, query.search)
+  async getCompanies(@Query() query: GetCompaniesQuery): Promise<Pagination<Company>> {
+    return this.companyService.getCompanies(query.page, query.limit)
   }
 
   @Get(':companyId')
