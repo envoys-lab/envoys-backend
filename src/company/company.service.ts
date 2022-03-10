@@ -14,10 +14,10 @@ import { Company, StageStatus } from './entity/company.entity'
 export class CompanyService {
   constructor(@InjectRepository(Company) private companyRepository: Repository<Company>) {}
 
-  async getCompanies(page?: number, limit?: number): Promise<Pagination<Company>> {
+  async getCompanies(page?: number, size?: number): Promise<Pagination<Company>> {
     const options: IPaginationOptions = {
       page: page || 1,
-      limit: limit ? (limit > 100 ? 100 : limit) : 10,
+      limit: size ? (size > 100 ? 100 : size) : 10,
     }
 
     const query = {

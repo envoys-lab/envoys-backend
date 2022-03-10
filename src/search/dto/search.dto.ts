@@ -10,5 +10,5 @@ export class PaginationQuery {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  limit?: number
+  size?: number
 }

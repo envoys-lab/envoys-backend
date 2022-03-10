@@ -22,7 +22,7 @@ export class CompanyAdminController {
 
   @Get()
   async getCompanies(@Query() query: GetCompaniesQuery): Promise<Pagination<Company>> {
-    return this.companyService.getCompanies(query.page, query.limit)
+    return this.companyService.getCompanies(query.page, query.size)
   }
 
   @Get(':companyId')
