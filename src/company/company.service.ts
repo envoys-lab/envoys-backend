@@ -1,30 +1,70 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { IPaginationOptions, paginate, Pagination } from 'nestjs-typeorm-paginate'
 import { ObjectID, Repository } from 'typeorm'
 import {
   AddCompanyRequest,
   ChangeCompanyVisibilityDto,
   DeleteCompanyResponse,
+  Pagination,
+  PaginationOptions,
   UpdateCompanyRequest,
 } from './dto/company.controller.dto'
 import { Company, StageStatus } from './entity/company.entity'
 
 @Injectable()
 export class CompanyService {
+  private readonly keyToFind = ['sellType', 'name', 'status', 'homePageUrl']
+  private readonly defaultPageSize = 10
+
   constructor(@InjectRepository(Company) private companyRepository: Repository<Company>) {}
 
-  async getCompanies(page?: number, size?: number): Promise<Pagination<Company>> {
-    const options: IPaginationOptions = {
-      page: page || 1,
-      limit: size ? (size > 100 ? 100 : size) : 10,
+  async getCompanies(page?: number, size?: number, search?: string): Promise<Pagination> {
+    return this.paginate(page, size, search)
+  }
+
+  private async paginate(page?: number, size?: number, search?: string) {
+    const query = this.getCompaniesQuery(search)
+    const options = this.getPaginationOptions(page, size)
+
+    const [result, total] = await this.companyRepository.manager.findAndCount(Company, {
+      ...query,
+      ...options,
+    })
+
+    return {
+      items: result,
+      meta: {
+        itemsPerPage: Number(size) || this.defaultPageSize,
+        totalItems: total || 0,
+        loadedItems: result.length,
+        totalPages: size ? Math.ceil(total / size) : Math.ceil(total / this.defaultPageSize),
+        currentPage: Number(page) || 1,
+      },
+    }
+  }
+
+  private getPaginationOptions(page: number, size: number): PaginationOptions {
+    size = size || this.defaultPageSize
+
+    return {
+      take: Number(size) || this.defaultPageSize,
+      skip: page ? (page - 1) * size : 0,
+    }
+  }
+
+  private getCompaniesQuery(search: string): object {
+    if (!search) {
+      return { where: { active: true } }
     }
 
-    const query = {
-      active: true,
+    const keyFindParameters = { $regex: search, $options: 'i' }
+    const query = { $or: [] }
+
+    for (const key of this.keyToFind) {
+      query.$or.push({ [key]: { ...keyFindParameters } })
     }
 
-    return paginate<Company>(this.companyRepository, options, query)
+    return { where: { $and: [{ active: true }, { $or: [...query.$or] }] } }
   }
 
   async getCompanyById(companyId: ObjectID): Promise<Company> {
