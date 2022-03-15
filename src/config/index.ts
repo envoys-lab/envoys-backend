@@ -16,10 +16,17 @@ const database = registerAs('database', () => ({
   connectionString: process.env.DB_CONNECTION_STRING,
 }))
 
+const aws = registerAs('aws', () => ({
+  accessKeyID: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  AWSRegion: process.env.AWS_REGION,
+  S3BucketName: process.env.S3_BUCKET_NAME,
+}))
+
 const kyc = registerAs('kyc', () => ({
   token: process.env.KYC_TOKEN,
   personFormId: process.env.KYC_FORM_ID_PERSON,
   companyFormId: process.env.KYC_FORM_ID_COMPANY,
 }))
 
-export default [server, http, database, kyc, app]
+export default [server, http, database, kyc, app, aws]

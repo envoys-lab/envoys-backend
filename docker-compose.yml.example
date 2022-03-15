@@ -10,6 +10,10 @@ services:
       KYC_FORM_ID_PERSON: <!!!>
       KYC_FORM_ID_COMPANY: <!!!>
       ADMIN_AUTH_TOKEN: 239231db00638243fa0b1d03488842ea1c06
+      ACCESS_KEY_ID: <!!!>
+      SECRET_ACCESS_KEY: <!!!>
+      AWS_REGION: eu-west-3
+      S3_BUCKET_NAME: envoysvision
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     depends_on:
