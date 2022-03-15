@@ -18,12 +18,12 @@ export class CompanyService {
 
   constructor(@InjectRepository(Company) private companyRepository: Repository<Company>) {}
 
-  async getCompanies(page?: number, size?: number, search?: string): Promise<Pagination> {
-    return this.paginate(page, size, search)
+  async getCompanies(page?: number, size?: number, search?: string, isAdminController?): Promise<Pagination> {
+    return this.paginate(page, size, search, isAdminController)
   }
 
-  private async paginate(page?: number, size?: number, search?: string) {
-    const query = this.getCompaniesQuery(search)
+  private async paginate(page?: number, size?: number, search?: string, isAdminController?) {
+    const query = this.getCompaniesQuery(search, isAdminController)
     const options = this.getPaginationOptions(page, size)
 
     const [result, total] = await this.companyRepository.manager.findAndCount(Company, {
@@ -52,7 +52,11 @@ export class CompanyService {
     }
   }
 
-  private getCompaniesQuery(search: string): object {
+  private getCompaniesQuery(search: string, isAdminController = false): object {
+    if (isAdminController) {
+      return
+    }
+
     if (!search) {
       return { where: { active: true } }
     }
