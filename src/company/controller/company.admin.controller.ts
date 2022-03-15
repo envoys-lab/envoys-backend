@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseInterceptors } from '@nestjs/common'
-import { Pagination } from 'nestjs-typeorm-paginate'
 import { CompanyService } from '../company.service'
 import {
   AddCompanyRequest,
@@ -9,6 +8,7 @@ import {
   DeleteCompanyResponse,
   GetCompaniesQuery,
   GetCompanyByIdParams,
+  Pagination,
   UpdateCompanyParams,
   UpdateCompanyRequest,
 } from '../dto/company.controller.dto'
@@ -21,8 +21,8 @@ export class CompanyAdminController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Get()
-  async getCompanies(@Query() query: GetCompaniesQuery): Promise<Pagination<Company>> {
-    return this.companyService.getCompanies(query.page, query.size)
+  async getCompanies(@Query() query: GetCompaniesQuery): Promise<Pagination> {
+    return this.companyService.getCompanies(query.page, query.size, query.search, true)
   }
 
   @Get(':companyId')

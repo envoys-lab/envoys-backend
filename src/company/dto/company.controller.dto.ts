@@ -12,9 +12,26 @@ import {
   IsUrl,
   ValidateNested,
 } from 'class-validator'
-import { PaginationQuery } from 'src/search/dto/search.dto'
 import { ObjectID } from 'typeorm'
 import { Company, StageStatus, StageType } from '../entity/company.entity'
+
+export interface Pagination {
+  items: any[]
+  meta: PaginationMeta
+}
+
+export interface PaginationOptions {
+  take: number
+  skip: number
+}
+
+export interface PaginationMeta {
+  itemsPerPage: number
+  totalItems: number
+  loadedItems: number
+  totalPages: number
+  currentPage: number
+}
 
 export class UrlField {
   @IsNotEmpty()
@@ -22,7 +39,21 @@ export class UrlField {
   url: string
 }
 
-export class GetCompaniesQuery extends PaginationQuery {}
+export class GetCompaniesQuery {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  page?: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  size?: number
+
+  @IsOptional()
+  @IsString()
+  search?: string
+}
 
 export interface GetCompaniesResponse {
   general?: SearchModel
