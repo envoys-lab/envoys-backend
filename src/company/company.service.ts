@@ -53,22 +53,27 @@ export class CompanyService {
   }
 
   private getCompaniesQuery(search: string, isAdminController = false): object {
-    if (isAdminController) {
+    if (!search && isAdminController) {
       return
     }
 
-    if (!search) {
+    if (!search && !isAdminController) {
       return { where: { active: true } }
     }
 
     const keyFindParameters = { $regex: search, $options: 'i' }
     const query = { $or: [] }
+    let active = {}
+
+    if (!isAdminController) {
+      active = { active: true }
+    }
 
     for (const key of this.keyToFind) {
       query.$or.push({ [key]: { ...keyFindParameters } })
     }
 
-    return { where: { $and: [{ active: true }, { $or: [...query.$or] }] } }
+    return { where: { $and: [active, { $or: [...query.$or] }] } }
   }
 
   async getCompanyById(companyId: ObjectID): Promise<Company> {
