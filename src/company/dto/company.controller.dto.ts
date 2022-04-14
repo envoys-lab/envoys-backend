@@ -326,6 +326,10 @@ export class AddCompanyRequest {
 
   @IsNotEmpty()
   @IsString()
+  token: string
+
+  @IsNotEmpty()
+  @IsString()
   description: string
 
   @IsNotEmpty()
@@ -427,6 +431,11 @@ export class UpdateCompanyRequest {
   @IsNotEmpty()
   @IsString()
   name: string
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  token: string
 
   @IsOptional()
   @IsNotEmpty()
