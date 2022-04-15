@@ -15,6 +15,9 @@ export class Company extends BaseEntity {
   name: string
 
   @Column()
+  token: string
+
+  @Column()
   sellType: string[]
 
   @Column()
