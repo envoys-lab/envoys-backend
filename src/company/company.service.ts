@@ -125,7 +125,7 @@ export class CompanyService {
 
   private updateCompanyStatus(company: Company, dto: Partial<Company>): Promise<Company> {
     if (dto.stages) {
-      company.status = this.getCompanyStatus(dto)
+      dto.status = this.getCompanyStatus(dto)
     }
 
     const updatedCompany = {
@@ -140,10 +140,26 @@ export class CompanyService {
     const stages = dto.stages
 
     if (stages.length > 1 && stages[0].status == StageStatus.UPCOMING) {
+      if (this.isLeftHavePastStatus(dto)) {
+        return stages[0].status
+      }
+
       return stages[1].status
     }
 
     return stages[0].status
+  }
+
+  private isLeftHavePastStatus(dto: Partial<Company>): boolean {
+    const stages = dto.stages
+
+    for (let i = 1; i < stages.length; i++) {
+      if (stages[i].status != StageStatus.PAST) {
+        return false
+      }
+    }
+
+    return true
   }
 
   async deleteCompany(companyId: ObjectID): Promise<DeleteCompanyResponse> {
