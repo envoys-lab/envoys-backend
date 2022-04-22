@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { userMock, userId, userWalletAddress, UserServiceMock } from '../../test/mock/user'
+import { userMock, userId, userWalletAddress, UserServiceMock, signature, message } from '../../test/mock/user'
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
 
@@ -38,16 +38,17 @@ describe('UserController', () => {
   describe('/POST :userWalletAddress', () => {
     it('should create user record and return it', async () => {
       const params = { userWalletAddress: userWalletAddress }
+      const body = { signature: signature, message: message }
       const connectUserDto = {
         ...userMock,
         userWalletAddress: userWalletAddress,
       }
       jest.spyOn(UserServiceMock, 'connectUser').mockResolvedValue(connectUserDto)
 
-      const connectUser = await controller.connectUser(params)
+      const connectUser = await controller.connectUser(params, body)
 
       expect(connectUser).toEqual(userMock)
-      expect(UserServiceMock.connectUser).toHaveBeenCalledWith(params.userWalletAddress)
+      expect(UserServiceMock.connectUser).toHaveBeenCalledWith(params.userWalletAddress, body.signature, body.message)
     })
   })
 })
