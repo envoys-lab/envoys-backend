@@ -1,7 +1,7 @@
-import { Controller, Get, Param, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { UserService } from './user.service'
 import { User } from './entity/user.entity'
-import { ConnectUserParams, GetUserByIdParams } from './dto/user.controller.dto'
+import { ConnectUserBody, ConnectUserParams, GetUserByIdParams } from './dto/user.controller.dto'
 
 @Controller('users')
 export class UserController {
@@ -13,7 +13,7 @@ export class UserController {
   }
 
   @Post(':userWalletAddress')
-  async connectUser(@Param() params: ConnectUserParams): Promise<User> {
-    return this.userService.connectUser(params.userWalletAddress)
+  async connectUser(@Param() params: ConnectUserParams, @Body() body: ConnectUserBody): Promise<User> {
+    return this.userService.connectUser(params.userWalletAddress, body.signature, body.message)
   }
 }

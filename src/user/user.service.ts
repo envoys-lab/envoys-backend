@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ObjectID, Repository } from 'typeorm'
 import { getUserKeyByType, User, UserType } from './entity/user.entity'
+import { ethers } from 'ethers'
 
 @Injectable()
 export class UserService {
@@ -16,13 +17,27 @@ export class UserService {
     return fetchedUser
   }
 
-  async connectUser(userWalletAddress: string): Promise<User> {
+  async connectUser(userWalletAddress: string, signature: string, message: string): Promise<User> {
+    const isValidAddress = await this.verifyWalletAddress(userWalletAddress, signature, message)
+    if (!isValidAddress) {
+      throw new ForbiddenException('Failed to verify user by signed message')
+    }
+
     const fetchedUser = await this.getUserByWalletAddress(userWalletAddress)
     if (!fetchedUser) {
       return this.createUser(userWalletAddress)
     }
 
     return fetchedUser
+  }
+
+  private async verifyWalletAddress(userWalletAddress: string, signature: string, message: string): Promise<boolean> {
+    try {
+      const signerAddress = await ethers.utils.verifyMessage(message, signature)
+      return signerAddress === userWalletAddress
+    } catch (e) {
+      return false
+    }
   }
 
   private async getUserByWalletAddress(userWalletAddress: string): Promise<User> {
