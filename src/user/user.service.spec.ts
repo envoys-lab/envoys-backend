@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm'
 import { ObjectID } from 'mongodb'
 import { User, userCompanyKey, userPersonKey } from './entity/user.entity'
 import { UserService } from './user.service'
-import { message, signature, userId, userMock, UserRepositoryMock, userWalletAddress, verificationId } from '../../test/mock/user'
+import { userId, userMock, UserRepositoryMock, userWalletAddress, verificationId } from '../../test/mock/user'
 
 describe('UserService', () => {
   let service: UserService
@@ -50,7 +50,7 @@ describe('UserService', () => {
       jest.spyOn(UserRepositoryMock, 'create').mockResolvedValue(userMock)
       jest.spyOn(UserRepositoryMock, 'save').mockResolvedValue(userMock)
 
-      const connectUser = await service.connectUser(userWalletAddress, signature, message)
+      const connectUser = await service.connectUser(userWalletAddress)
 
       expect(connectUser).toEqual(userMock)
     })

@@ -2,9 +2,6 @@ import { ObjectID } from 'mongodb'
 import { UserType } from '../../src/user/entity/user.entity'
 
 export const userWalletAddress = '0x0D3dE49668C749f6C5C2E97Eb3C511118bDCEF53'
-export const signature =
-  '0xd33b3fa81b304d4584a7cf304fbdda8cbc261b16c0ea169487ac5a5743aaeaca71d22f2150438908e5ff4486d5461f6103171e40b756f176f7421602af2d3e941c'
-export const message = 'Example message'
 export const verificationId = '17efc59c0018c2360e0b6e14f8a13c1c0fb8'
 export const applicantId = '92b57052056042486d0b81f47402cb0974ab'
 export const userId = new ObjectID('6205840eae89880012c0ad47')

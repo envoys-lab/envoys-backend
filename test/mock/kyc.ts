@@ -1,6 +1,9 @@
 import { VerificationStatus } from '../../src/kycaid/dto/kycaid.dto'
 import { applicantId, userId, verificationId } from './user'
 
+export const signature =
+  '0xd33b3fa81b304d4584a7cf304fbdda8cbc261b16c0ea169487ac5a5743aaeaca71d22f2150438908e5ff4486d5461f6103171e40b756f176f7421602af2d3e941c'
+export const message = 'Example message'
 export const companyFormId = '678sdfsadas'
 export const personFormId = '678sdfsfsdnc'
 export const formUrl = 'same-random-form-url'
