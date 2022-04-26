@@ -9,7 +9,14 @@ export class KYCController {
 
   @Post(':userId/verification/:userType/create')
   async createFormUrl(@Param() params: CreateFormUrlParams, @Body() body: CreateFormUrlBody) {
-    return this.kycService.createFormUrl(params.userId, params.userType, body.redirectUrl)
+    return this.kycService.createFormUrl(
+      params.userId,
+      params.userType,
+      body.userWalletAddress,
+      body.signature,
+      body.message,
+      body.redirectUrl,
+    )
   }
 
   @Post(':userId/verification/refresh')

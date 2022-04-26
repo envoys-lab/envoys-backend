@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { ethers } from 'ethers'
 import {
   CreateFormUrl,
   CreateFormUrlResponse,
@@ -23,7 +24,19 @@ export class KYCService {
     this.companyFormId = this.configService.get<string>('kyc.companyFormId')
   }
 
-  async createFormUrl(userId: ObjectID, userType: UserType, redirectUrl?: string): Promise<FormUrlResponse> {
+  async createFormUrl(
+    userId: ObjectID,
+    userType: UserType,
+    userWalletAddress: string,
+    signature: string,
+    message: string,
+    redirectUrl?: string,
+  ): Promise<FormUrlResponse> {
+    const isValidAddress = await this.verifyWalletAddress(userWalletAddress, signature, message)
+    if (!isValidAddress) {
+      throw new ForbiddenException('Failed to verify user by signed message')
+    }
+
     const user: User = await this.userService.getUserById(userId)
 
     const userData = user[getUserKeyByType(userType)]
@@ -43,6 +56,15 @@ export class KYCService {
     }
 
     return this.requestFormUrl(user, userType, redirectUrl)
+  }
+
+  private async verifyWalletAddress(userWalletAddress: string, signature: string, message: string): Promise<boolean> {
+    try {
+      const signerAddress = await ethers.utils.verifyMessage(message, signature)
+      return signerAddress === userWalletAddress
+    } catch (e) {
+      return false
+    }
   }
 
   private async requestFormUrl(user: User, userType: UserType, redirectUrl: string): Promise<FormUrlResponse> {

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { userId } from '../../test/mock/user'
+import { userId, userWalletAddress } from '../../test/mock/user'
 import { UserType } from '../user/entity/user.entity'
 import { KYCController } from './kyc.controller'
 import { KYCService } from './kyc.service'
@@ -8,7 +8,9 @@ import {
   createFormUrlResponse,
   getFormUrlDto,
   KYCServiceMock,
+  message,
   refreshVerificationResponse,
+  signature,
   verificationDto,
 } from '../../test/mock/kyc'
 
@@ -35,6 +37,9 @@ describe('KYCController', () => {
         userType: UserType.PERSON,
       }
       const body = {
+        userWalletAddress,
+        signature,
+        message,
         redirectUrl: 'http://localhost',
       }
       jest.spyOn(KYCServiceMock, 'createFormUrl').mockResolvedValue(createFormUrlResponse)

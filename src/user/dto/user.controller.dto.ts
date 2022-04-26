@@ -8,14 +8,6 @@ export class ConnectUserParams {
   userWalletAddress: string
 }
 
-export class ConnectUserBody {
-  @IsNotEmpty()
-  signature: string
-
-  @IsNotEmpty()
-  message: string
-}
-
 export class GetUserByIdParams {
   @IsMongoId()
   id: ObjectID
