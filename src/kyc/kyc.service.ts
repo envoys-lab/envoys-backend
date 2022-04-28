@@ -48,7 +48,7 @@ export class KYCService {
     }
 
     if (userStatus == VerificationStatus.COMPLETED && isUserVerified) {
-      throw new BadRequestException(`The KYC [${userType}] verification for ${userId} has been completed.`)
+      return this.requestFormUrl(user, userType, redirectUrl, true)
     }
 
     if (userData.formUrl && userStatus == VerificationStatus.UNUSED) {
@@ -67,7 +67,12 @@ export class KYCService {
     }
   }
 
-  private async requestFormUrl(user: User, userType: UserType, redirectUrl: string): Promise<FormUrlResponse> {
+  private async requestFormUrl(
+    user: User,
+    userType: UserType,
+    redirectUrl: string,
+    isCompleted?: boolean,
+  ): Promise<FormUrlResponse> {
     const formId = this.getFormIdByUserType(userType)
     const body: CreateFormUrl = {
       external_applicant_id: user._id.toString(),
@@ -75,23 +80,30 @@ export class KYCService {
     }
 
     const fetchedData = await this.kycAidService.createFormUrl(formId, body)
-    await this.updateUserData(user, userType, fetchedData)
+    await this.updateUserData(user, userType, fetchedData, isCompleted)
 
     return { formUrl: fetchedData.form_url }
   }
 
-  private async updateUserData(user: User, userType: UserType, data: CreateFormUrlResponse): Promise<void> {
+  private async updateUserData(
+    user: User,
+    userType: UserType,
+    data: CreateFormUrlResponse,
+    isCompleted?: boolean,
+  ): Promise<void> {
     const userKey = getUserKeyByType(userType)
 
     await this.userService.updateUser({
       _id: user._id,
       [userKey]: {
+        ...user[userKey],
         verificationId: data.verification_id,
         formUrl: data.form_url,
         verification: {
           ...user[userKey].verification,
-          status: VerificationStatus.UNUSED,
-          verified: false,
+          status:
+            isCompleted && user[userKey].verification.status ? user[userKey].verification.status : VerificationStatus.UNUSED,
+          verified: isCompleted && user[userKey].verification.verified ? user[userKey].verification.verified : false,
         },
       },
     })
