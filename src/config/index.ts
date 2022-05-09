@@ -29,4 +29,8 @@ const kyc = registerAs('kyc', () => ({
   companyFormId: process.env.KYC_FORM_ID_COMPANY,
 }))
 
-export default [server, http, database, kyc, app, aws]
+const covalent = registerAs('covalent', () => ({
+  APIKey: process.env.COVALENT_API_KEY,
+}))
+
+export default [server, http, database, kyc, app, aws, covalent]

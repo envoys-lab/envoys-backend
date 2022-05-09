@@ -18,6 +18,12 @@ export class Company extends BaseEntity {
   token: string
 
   @Column()
+  lastHoldersCountUpdate: number
+
+  @Column()
+  holdersCount: number
+
+  @Column()
   sellType: string[]
 
   @Column()

@@ -7,9 +7,10 @@ import { Company } from './entity/company.entity'
 import { CompanyAdminFilesController } from './controller/company.admin.files.controller'
 import { CompanyUserController } from './controller/company.user.controller'
 import { AWSModule } from 'src/aws/aws.module'
+import { CovalentModule } from 'src/covalent/covalent.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Company]), AWSModule],
+  imports: [TypeOrmModule.forFeature([Company]), AWSModule, CovalentModule],
   controllers: [CompanyAdminController, CompanyAdminFilesController, CompanyUserController],
   providers: [CompanyService, CompanyAdminFilesService],
 })
