@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { CovalentService } from 'src/covalent/covalent.service'
 import { ObjectID, Repository } from 'typeorm'
 import {
   AddCompanyRequest,
@@ -16,7 +17,10 @@ export class CompanyService {
   private readonly keyToFind = ['sellType', 'name', 'status', 'homePageUrl']
   private readonly defaultPageSize = 10
 
-  constructor(@InjectRepository(Company) private companyRepository: Repository<Company>) {}
+  constructor(
+    @InjectRepository(Company) private companyRepository: Repository<Company>,
+    private covalentService: CovalentService,
+  ) {}
 
   async getCompanies(page?: number, size?: number, search?: string, isAdminController?): Promise<Pagination> {
     return this.paginate(page, size, search, isAdminController)
@@ -78,12 +82,32 @@ export class CompanyService {
 
   async getCompanyById(companyId: ObjectID): Promise<Company> {
     const company: Company = await this.companyRepository.findOne(companyId)
-
     if (!company) {
       throw new NotFoundException(`Unable to find company by id: ${companyId}`)
     }
 
+    if (this.isNeedUpdate(company.lastHoldersCountUpdate)) {
+      const dataForUpdate = await this.covalentService.updateHoldersCount(company.token, companyId)
+      if (dataForUpdate) {
+        const dto = {
+          ...company,
+          ...dataForUpdate,
+        }
+
+        return this.updateCompany(companyId, dto)
+      }
+    }
+
     return company
+  }
+
+  private isNeedUpdate(lastHoldersCountUpdate: number): boolean {
+    if (!lastHoldersCountUpdate) {
+      return true
+    }
+
+    const differenceInMS = Date.now() - lastHoldersCountUpdate
+    return differenceInMS > 3600000
   }
 
   async addCompany(dto: AddCompanyRequest): Promise<Company> {
