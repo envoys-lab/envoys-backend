@@ -1,7 +1,6 @@
-version: "3.8"
+version: '3.8'
 
 services:
-
   app:
     image: registry.beta.envoys.vision/envoys-backend:develop-${VERSION}
     restart: always
@@ -11,23 +10,24 @@ services:
       KYC_TOKEN: abc3d418057464479a1941d8596bf2d31d1a
       KYC_FORM_ID_PERSON: f687c94c046de440441a14b820dea051a2a4
       KYC_FORM_ID_COMPANY: 7d5bad4a048a3444501bad182de39096d1ed
+      COVALENT_API_KEY: ckey_70a8051e54d646b2a2568297257
       ADMIN_AUTH_TOKEN: 239231db00638243fa0b1d03488842ea1c06
       ACCESS_KEY_ID: AKIA5DNGX2QXHMH7UFV7
       SECRET_ACCESS_KEY: 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
       AWS_REGION: eu-west-3
       S3_BUCKET_NAME: envoysvision
     expose:
-      - "3000"
+      - '3000'
     networks:
       - envoys-docker_default
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.beta.envoys.vision`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend.service=backend"
-      - "traefik.http.routers.backend.tls.certresolver=leresolver"
-      - "traefik.http.routers.backend.middlewares=cors@docker"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.backend.rule=Host(`api.beta.envoys.vision`)'
+      - 'traefik.http.routers.backend.entrypoints=websecure'
+      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.backend.service=backend'
+      - 'traefik.http.routers.backend.tls.certresolver=leresolver'
+      - 'traefik.http.routers.backend.middlewares=cors@docker'
 
 networks:
   envoys-docker_default:
