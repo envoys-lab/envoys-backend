@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -17,17 +17,17 @@ services:
       AWS_REGION: eu-west-3
       S3_BUCKET_NAME: envoysvision
     expose:
-      - '3000'
+      - "3000"
     networks:
       - envoys-docker_default
     labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.backend.rule=Host(`api.beta.envoys.vision`)'
-      - 'traefik.http.routers.backend.entrypoints=websecure'
-      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
-      - 'traefik.http.routers.backend.service=backend'
-      - 'traefik.http.routers.backend.tls.certresolver=leresolver'
-      - 'traefik.http.routers.backend.middlewares=cors@docker'
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.beta.envoys.vision`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.service=backend"
+      - "traefik.http.routers.backend.tls.certresolver=leresolver"
+      - "traefik.http.routers.backend.middlewares=cors@docker"
 
 networks:
   envoys-docker_default:
