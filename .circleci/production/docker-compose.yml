@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  app:
+    image: registry.app.envoys.vision/envoys-backend:production-${VERSION}
+    restart: always
+    environment:
+      SERVER_PORT: 3000
+      DB_CONNECTION_STRING: mongodb://user:HYWnFaMqE676M7cB@mongodb:27017/envoys
+      KYC_TOKEN: abc3d418057464479a1941d8596bf2d31d1a
+      KYC_FORM_ID_PERSON: f687c94c046de440441a14b820dea051a2a4
+      KYC_FORM_ID_COMPANY: 7d5bad4a048a3444501bad182de39096d1ed
+      COVALENT_API_KEY: ckey_8031f51562be4fc7b7a5e374465
+      ADMIN_AUTH_TOKEN: 239231db00638243fa0b1d03488842ea1c06
+      ACCESS_KEY_ID: AKIA5DNGX2QXHMH7UFV7
+      SECRET_ACCESS_KEY: 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
+      AWS_REGION: us-east-1
+      S3_BUCKET_NAME: envoysprod
+    expose:
+      - "3000"
+    networks:
+      - envoys-docker_default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.app.envoys.vision`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.service=backend"
+      - "traefik.http.routers.backend.tls.certresolver=leresolver"
+      - "traefik.http.routers.backend.middlewares=cors@docker"
+
+networks:
+  envoys-docker_default:
+    external: true
