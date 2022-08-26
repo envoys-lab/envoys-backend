@@ -163,7 +163,7 @@ export interface QuestionModel {
 }
 
 export enum StageType {
-  ICO = 'ICO',
+  IDO = 'IDO',
   PRIVATE_SALE = 'Private Sale',
   PRE_SALE = 'Pre Sale',
   RELEASE = 'Release',
