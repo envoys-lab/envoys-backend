@@ -61,9 +61,9 @@ jobs:
       - run:
           name: Publish docker image
           command: |
-            echo "Build number: ${CIRCLE_BUILD_NUM}"
-            docker tag envoys-backend "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
-            docker push "registry.beta.envoys.vision/envoys-backend:develop-${CIRCLE_BUILD_NUM}"
+            echo "Build number: << pipeline.number >>"
+            docker tag envoys-backend "registry.beta.envoys.vision/envoys-backend:develop-<< pipeline.number >>"
+            docker push "registry.beta.envoys.vision/envoys-backend:develop-<< pipeline.number >>"
 
   image_production:
     machine: true
@@ -78,9 +78,9 @@ jobs:
       - run:
           name: Publish docker image
           command: |
-            echo "Build number: ${CIRCLE_BUILD_NUM}"
-            docker tag envoys-backend "registry.app.envoys.vision/envoys-backend:production-${CIRCLE_BUILD_NUM}"
-            docker push "registry.app.envoys.vision/envoys-backend:production-${CIRCLE_BUILD_NUM}"
+            echo "Build number: << pipeline.number >>"
+            docker tag envoys-backend "registry.app.envoys.vision/envoys-backend:production-<< pipeline.number >>"
+            docker push "registry.app.envoys.vision/envoys-backend:production-<< pipeline.number >>"
 
   deploy_to_develop:
     docker:
