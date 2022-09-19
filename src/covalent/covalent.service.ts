@@ -51,8 +51,8 @@ export class CovalentService {
     const holdersCount = await this.getHoldersCount(token, companyId)
 
     if (holdersCount == null) {
-      this.logger.error(`${this.constructor.name}: Unable to update holdersCount for: ${companyId}`)
-      return
+      this.logger.warn(`${this.constructor.name}: Unable to update holdersCount for: ${companyId}`)
+      return { lastHoldersCountUpdate: Date.now(), holdersCount: 0 }
     }
 
     return { lastHoldersCountUpdate: Date.now(), holdersCount: holdersCount }
