@@ -99,15 +99,6 @@ export class TokenModel {
   @IsArray()
   @IsString({ each: true })
   distribution: string[]
-
-  @IsNotEmpty()
-  @IsArray()
-  @IsString({ each: true })
-  currencies: string[]
-
-  @IsNotEmpty()
-  @IsString()
-  minContribution: string
 }
 
 export class CompanyModel {
@@ -124,32 +115,10 @@ export class CompanyModel {
   foundedDate: string
 }
 
-export class WhitelistModel {
-  @IsNotEmpty()
-  @IsString()
-  fromDate: string
-
-  @IsNotEmpty()
-  @IsString()
-  tillDate: string
-
-  @IsNotEmpty()
-  @IsString()
-  categories: string
-}
-
 export class AdditionalCompanyDetails {
   @IsNotEmpty()
   @IsString()
   platform: string
-
-  @ValidateNested()
-  @Type(() => WhitelistModel)
-  whitelist: WhitelistModel
-
-  @IsNotEmpty()
-  @IsString()
-  MVP: string
 }
 
 export class DetailsModel {
@@ -162,12 +131,6 @@ export class DetailsModel {
   @ValidateNested()
   @Type(() => CompanyModel)
   company: CompanyModel
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsArray()
-  @IsString({ each: true })
-  bonus: string[]
 
   @IsOptional()
   @ValidateNested()
@@ -369,12 +332,6 @@ export class AddCompanyRequest {
   @ValidateNested()
   @Type(() => DetailsModel)
   details: DetailsModel
-
-  @IsDefined()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => StageModel)
-  stages: StageModel[]
 
   @IsDefined()
   @IsArray()
