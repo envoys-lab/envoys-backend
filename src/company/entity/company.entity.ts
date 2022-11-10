@@ -87,7 +87,6 @@ export interface AboutModel {
 export interface DetailsModel {
   token: TokenModel
   company: CompanyModel
-  bonus: string[]
   additional: AdditionalCompanyDetails
 }
 
@@ -95,8 +94,6 @@ export interface TokenModel {
   ticker: string
   supply: string
   distribution: string[]
-  currencies: string[]
-  minContribution: string
 }
 
 export interface CompanyModel {
@@ -107,8 +104,6 @@ export interface CompanyModel {
 
 export interface AdditionalCompanyDetails {
   platform: string
-  whitelist: WhitelistModel
-  MVP: string
 }
 
 export interface WhitelistModel {
