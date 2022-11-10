@@ -11,13 +11,9 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService)
   app.enableCors({
+    methods: 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH',
     origin: '*',
     credentials: true
-  });
-
-  app.use((_, res: Response, next: NextFunction) => {
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH')
-    next();
   });
 
 
